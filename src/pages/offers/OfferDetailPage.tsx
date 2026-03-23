@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
-import { ArrowLeft, MapPin, CheckCircle2, Calendar, Users, ChevronDown, ChevronUp, Star, Bookmark, BookmarkCheck, Share2 } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { ArrowLeft, MapPin, CheckCircle2, Calendar, Users, ChevronDown, ChevronUp, Star, Bookmark, BookmarkCheck, Share2, Zap, Gift, ShieldCheck, Clock, Heart, Edit3 } from 'lucide-react';
 import { OFFERS, MERCHANTS } from '@/data/mockData';
 import { formatDateLong, formatDistance } from '@/utils/formatters';
 import { useLocalStorage } from '@/hooks/useLocalStorage';
