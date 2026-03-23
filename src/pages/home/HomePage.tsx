@@ -127,8 +127,8 @@ export default function HomePage() {
         className="max-w-7xl mx-auto md:px-8 lg:px-12"
       >
         {/* Modern Hero Section */}
-        <div className="relative h-[480px] md:h-[540px] mt-6 px-5 md:px-0 mb-16">
-          <div className="w-full h-full rounded-[48px] overflow-hidden relative shadow-2xl">
+        <div className="relative h-[320px] md:h-[380px] mt-6 px-5 md:px-0 mb-10">
+          <div className="w-full h-full rounded-[32px] md:rounded-[40px] overflow-hidden relative shadow-2xl">
             <AnimatePresence mode="wait">
               <motion.div
                 key={currentHero}
@@ -147,15 +147,15 @@ export default function HomePage() {
               </motion.div>
             </AnimatePresence>
 
-            <div className="absolute inset-0 flex flex-col justify-end p-8 md:p-16">
-              <div className="max-w-2xl space-y-6">
+            <div className="absolute inset-0 flex flex-col justify-end p-6 md:p-12">
+              <div className="max-w-2xl space-y-4">
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.5 }}
-                  className="inline-flex items-center gap-2 px-4 py-1.5 bg-green-500/20 backdrop-blur-md border border-white/20 rounded-full text-white text-[10px] md:text-xs font-bold uppercase tracking-[0.2em]"
+                  className="inline-flex items-center gap-2 px-3 py-1 bg-green-500/20 backdrop-blur-md border border-white/20 rounded-full text-white text-[9px] md:text-[10px] font-bold uppercase tracking-[0.2em]"
                 >
-                  <Sparkles size={14} className="text-green-400" />
+                  <Sparkles size={12} className="text-green-400" />
                   {heroSlides[currentHero].badge}
                 </motion.div>
                 
@@ -163,7 +163,7 @@ export default function HomePage() {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.6 }}
-                  className="text-4xl md:text-6xl font-display font-bold text-white leading-tight"
+                  className="text-3xl md:text-5xl font-display font-bold text-white leading-tight"
                 >
                   {heroSlides[currentHero].title}
                 </motion.h1>
@@ -172,7 +172,7 @@ export default function HomePage() {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.7 }}
-                  className="text-white/70 text-base md:text-lg max-w-lg leading-relaxed font-medium"
+                  className="text-white/70 text-sm md:text-base max-w-lg leading-relaxed font-medium line-clamp-2 md:line-clamp-none"
                 >
                   {heroSlides[currentHero].desc}
                 </motion.p>
@@ -181,39 +181,39 @@ export default function HomePage() {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.8 }}
-                  className="flex flex-col sm:flex-row gap-4 pt-4"
+                  className="flex flex-col sm:flex-row gap-4 pt-2"
                 >
                   <button 
                     onClick={() => navigate('/explore')}
-                    className="px-10 py-5 bg-green-600 text-white rounded-2xl font-display font-bold shadow-xl shadow-green-900/40 hover:bg-green-700 transition-all hover:-translate-y-1 btn-press flex items-center justify-center gap-3"
+                    className="px-8 py-4 bg-green-600 text-white rounded-xl font-display font-bold shadow-xl shadow-green-900/40 hover:bg-green-700 transition-all hover:-translate-y-1 btn-press flex items-center justify-center gap-2 text-sm"
                   >
-                    Start Exploring <ArrowRight size={20} />
+                    Start Exploring <ArrowRight size={18} />
                   </button>
-                  <div className="flex -space-x-3 items-center">
+                  <div className="flex -space-x-2 items-center">
                     {[1,2,3,4].map(i => (
-                      <div key={i} className="w-10 h-10 rounded-full border-2 border-white bg-slate-200 overflow-hidden shadow-sm">
+                      <div key={i} className="w-8 h-8 rounded-full border-2 border-white bg-slate-200 overflow-hidden shadow-sm">
                         <img src={`https://i.pravatar.cc/150?u=${i+10}`} alt="User" />
                       </div>
                     ))}
-                    <span className="pl-6 text-white/80 text-xs font-bold uppercase tracking-widest">10k+ local savers</span>
+                    <span className="pl-4 text-white/80 text-[10px] font-bold uppercase tracking-widest">10k+ local savers</span>
                   </div>
                 </motion.div>
               </div>
             </div>
 
             {/* Slider Controls */}
-            <div className="absolute bottom-8 right-8 flex gap-3">
+            <div className="absolute bottom-6 right-6 flex gap-2">
               <button 
                 onClick={() => setCurrentHero(prev => (prev - 1 + heroSlides.length) % heroSlides.length)}
-                className="w-12 h-12 rounded-2xl bg-white/10 backdrop-blur-md border border-white/20 text-white flex items-center justify-center hover:bg-white/20 transition-all"
+                className="w-10 h-10 rounded-xl bg-white/10 backdrop-blur-md border border-white/20 text-white flex items-center justify-center hover:bg-white/20 transition-all"
               >
-                <ChevronLeft size={20} />
+                <ChevronLeft size={18} />
               </button>
               <button 
                 onClick={() => setCurrentHero(prev => (prev + 1) % heroSlides.length)}
-                className="w-12 h-12 rounded-2xl bg-white/10 backdrop-blur-md border border-white/20 text-white flex items-center justify-center hover:bg-white/20 transition-all"
+                className="w-10 h-10 rounded-xl bg-white/10 backdrop-blur-md border border-white/20 text-white flex items-center justify-center hover:bg-white/20 transition-all"
               >
-                <ChevronRight size={20} />
+                <ChevronRight size={18} />
               </button>
             </div>
           </div>

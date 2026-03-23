@@ -1,7 +1,7 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Store, Eye, EyeOff, ChevronDown } from 'lucide-react';
+import { Store, Eye, EyeOff, ChevronDown, Users } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 
 const CATEGORIES = [
@@ -82,7 +82,7 @@ export default function MerchantLoginPage() {
       className="min-h-screen flex flex-col md:flex-row"
     >
       {/* ── Green Hero ── */}
-      <div className="flex-[0_0_45%] md:flex-[0_0_48%] md:min-h-screen flex flex-col items-center justify-center relative overflow-hidden gradient-hero">
+      <div className="flex-[0_0_30%] md:flex-[0_0_35%] md:min-h-[60vh] flex flex-col items-center justify-center relative overflow-hidden gradient-hero">
         <div
           className="absolute inset-0 opacity-30"
           style={{
@@ -96,33 +96,33 @@ export default function MerchantLoginPage() {
             <Store size={40} className="text-white" />
           </div>
 
-          <h1 className="font-display font-bold text-4xl md:text-5xl text-white tracking-tight">
+          <h1 className="font-display font-bold text-3xl md:text-4xl text-white tracking-tight">
             OFFERLY
           </h1>
-          <div className="bg-white/10 backdrop-blur-md rounded-full px-4 py-1.5 border border-white/20 mt-3 mb-6">
-            <p className="text-white text-[10px] font-display font-bold uppercase tracking-widest">
+          <div className="bg-white/10 backdrop-blur-md rounded-full px-3 py-1 border border-white/20 mt-2 mb-4">
+            <p className="text-white text-[9px] font-display font-bold uppercase tracking-widest">
               Merchant Portal
             </p>
           </div>
 
-          <h2 className="font-display font-bold text-2xl md:text-3xl text-white leading-tight max-w-[280px]">
+          <h2 className="font-display font-bold text-xl md:text-2xl text-white leading-tight max-w-[240px]">
             Grow Your Local Business
           </h2>
-          <p className="text-white/70 text-sm mt-3 max-w-[260px]">
-            List your offers, track performance and reach thousands of local customers.
+          <p className="text-white/70 text-xs mt-2 max-w-[240px]">
+            List your offers, track performance and reach local customers.
           </p>
 
-          <div className="hidden md:flex gap-6 mt-10">
+          <div className="hidden md:flex gap-4 mt-8">
             {[
               { value: '500+', label: 'Merchants' },
               { value: '40%', label: 'Growth' },
             ].map((s) => (
               <div
                 key={s.label}
-                className="bg-white/10 backdrop-blur-xl rounded-2xl px-6 py-3 border border-white/10 text-center"
+                className="bg-white/10 backdrop-blur-xl rounded-xl px-4 py-2 border border-white/10 text-center"
               >
-                <p className="text-white font-display font-bold text-xl">{s.value}</p>
-                <p className="text-white/60 text-[10px] uppercase tracking-wider">{s.label}</p>
+                <p className="text-white font-display font-bold text-lg">{s.value}</p>
+                <p className="text-white/60 text-[9px] uppercase tracking-wider">{s.label}</p>
               </div>
             ))}
           </div>
