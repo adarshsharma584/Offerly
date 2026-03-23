@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Users, Search, Mail, Phone, Calendar, Trash2, User as UserIcon, Eye } from 'lucide-react';
-import AdminLayout from '@/components/layout/AdminLayout';
+import DashboardLayout from '@/components/layout/DashboardLayout';
 import { usePlatformData } from '@/context/PlatformDataContext';
 
 export default function AdminUsers() {
@@ -15,7 +15,7 @@ export default function AdminUsers() {
   );
 
   return (
-    <AdminLayout>
+    <DashboardLayout role="admin">
       <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} className="space-y-8 pb-20">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div>
@@ -130,6 +130,6 @@ export default function AdminUsers() {
           </div>
         )}
       </motion.div>
-    </AdminLayout>
+    </DashboardLayout>
   );
 }

@@ -17,6 +17,7 @@ export default function UserLoginPage() {
     }
     setError('');
     localStorage.setItem('offerly_phone', `+91 ${phone}`);
+    localStorage.setItem('offerly_login_role', 'user');
     navigate('/otp');
   };
 
@@ -193,29 +194,7 @@ export default function UserLoginPage() {
               </motion.div>
             </div>
 
-            {/* Links to other portals */}
-            <div className="mt-6 pt-5 border-t border-app-border space-y-2">
-              <p className="text-center text-app-muted text-xs">
-                Are you a merchant?{' '}
-                <Link
-                  to="/merchant/login"
-                  className="text-green-700 font-bold hover:underline"
-                >
-                  Merchant Portal →
-                </Link>
-              </p>
-              <p className="text-center text-app-muted text-xs">
-                Admin access?{' '}
-                <Link
-                  to="/admin/login"
-                  className="text-green-700 font-bold hover:underline"
-                >
-                  Admin Console →
-                </Link>
-              </p>
-            </div>
-
-            <p className="text-center text-app-muted text-[11px] mt-5">
+            <p className="text-center text-app-muted text-[11px] mt-10">
               Terms of Service · Privacy Policy
             </p>
           </motion.div>

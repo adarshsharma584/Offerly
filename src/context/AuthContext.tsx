@@ -2,7 +2,8 @@ import React, { createContext, useContext, ReactNode } from 'react';
 import { useLocalStorage } from '@/hooks/useLocalStorage';
 import { MOCK_USER } from '@/data/mockData';
 
-export type UserRole = 'user' | 'merchant' | 'admin';
+export type UserRole = 'user' | 'merchant' | 'admin' | 'sub_admin';
+export type SubAdminCategory = 'support' | 'merchant_mgmt' | 'offer_mgmt' | 'ad_mgmt' | 'feedback' | null;
 
 interface User {
   id: string;
@@ -19,11 +20,14 @@ interface User {
   businessName?: string;
   category?: string;
   isVerified?: boolean;
+  subAdminCategory?: SubAdminCategory; // For Sub-Admin role
+  subscriptionPlan?: 'free' | 'monthly' | 'yearly' | null; // For Merchant role
 }
 
 interface AuthContextType {
   user: User | null;
-  login: (phone: string, role?: UserRole) => void;
+  login: (phone: string, role?: UserRole, subCat?: SubAdminCategory) => void;
+  signup: (userData: Partial<User>) => void;
   logout: () => void;
   updateUser: (updates: Partial<User>) => void;
 }
@@ -33,16 +37,27 @@ const AuthContext = createContext<AuthContextType | null>(null);
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useLocalStorage<User | null>('offerly_user', null);
 
-  const login = (phone: string, role: UserRole = 'user') => {
+  const login = (phone: string, role: UserRole = 'user', subCat: SubAdminCategory = null) => {
     if (role === 'admin') {
       setUser({
         id: 'admin_001',
-        name: 'Admin User',
+        name: 'Super Admin',
         phone: phone,
         email: 'admin@offerly.in',
         role: 'admin',
         location: 'Golaghat, Assam',
         notifications: 5,
+      });
+    } else if (role === 'sub_admin') {
+      setUser({
+        id: 'sub_admin_001',
+        name: 'Support Executive',
+        phone: phone,
+        email: 'support@offerly.in',
+        role: 'sub_admin',
+        subAdminCategory: subCat || 'support',
+        location: 'Golaghat, Assam',
+        notifications: 3,
       });
     } else if (role === 'merchant') {
       setUser({
@@ -56,6 +71,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         isVerified: true,
         location: 'Golaghat, Assam',
         notifications: 2,
+        subscriptionPlan: 'monthly',
       });
     } else {
       setUser({
@@ -64,6 +80,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         role: 'user',
       } as User);
     }
+  };
+
+  const signup = (userData: Partial<User>) => {
+    setUser(userData as User);
   };
 
   const logout = () => {
@@ -79,7 +99,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, logout, updateUser }}>
+    <AuthContext.Provider value={{ user, login, signup, logout, updateUser }}>
       {children}
     </AuthContext.Provider>
   );

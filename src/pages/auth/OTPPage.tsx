@@ -47,7 +47,17 @@ export default function OTPPage() {
     const finalCode = code || otp.join('');
     if (finalCode.length !== 6) { setError('Enter all 6 digits'); return; }
     setLoading(true);
-    setTimeout(() => { login(phone); navigate('/'); }, 500);
+    const role = (localStorage.getItem('offerly_login_role') as any) || 'user';
+    const subCat = (localStorage.getItem('offerly_sub_cat') as any) || null;
+    setTimeout(() => { 
+      login(phone, role, subCat); 
+      if (role === 'admin') navigate('/admin');
+      else if (role === 'merchant') navigate('/merchant');
+      else if (role === 'sub_admin') navigate('/sub-admin');
+      else navigate('/'); 
+      // Cleanup
+      localStorage.removeItem('offerly_sub_cat');
+    }, 500);
   };
 
   return (

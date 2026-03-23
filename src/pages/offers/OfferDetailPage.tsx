@@ -71,74 +71,161 @@ export default function OfferDetailPage() {
           </div>
         </div>
 
-        {/* Merchant Info */}
-        <div className="px-5 md:px-8 pt-8 md:pt-10 pb-3 border-b border-green-50">
-          <h2 className="font-display font-bold text-xl md:text-2xl text-app-text">{merchant.name}</h2>
-          <div className="flex items-center gap-2 mt-1.5 flex-wrap">
-            <span className="text-app-muted text-xs md:text-sm capitalize bg-green-50 px-2 py-0.5 rounded-full">{merchant.category}</span>
-            <span className="flex items-center gap-1 text-app-muted text-xs md:text-sm"><MapPin size={11} className="text-green-600" /> {formatDistance(merchant.distance)}</span>
-            <span className="flex items-center gap-1 text-app-muted text-xs md:text-sm"><Star size={11} className="text-amber-500 fill-amber-500" /> {merchant.rating}</span>
-            {merchant.isVerified && (
-              <span className="flex items-center gap-1 text-green-700 text-xs md:text-sm bg-green-50 px-2 py-0.5 rounded-full">
-                <CheckCircle2 size={11} /> Verified
-              </span>
-            )}
-          </div>
-        </div>
-
-        {/* Offer Info */}
-        <div className="px-5 md:px-8 py-4 md:py-6 border-b border-green-50">
-          <h1 className="font-display font-bold text-[22px] md:text-3xl text-gradient mb-2">{offer.title}</h1>
-          <p className="text-app-muted text-sm md:text-base mb-3">{offer.desc}</p>
-          <div className="flex flex-wrap gap-3">
-            <div className="glass-card !rounded-xl px-3 py-2 flex items-center gap-2">
-              <Calendar size={14} className="text-green-600" />
-              <span className="text-xs md:text-sm text-app-text">Valid till {formatDateLong(offer.validTill)}</span>
+        {/* Offer Info - Ticket Design */}
+        <div className="px-5 md:px-8 -mt-10 relative z-10">
+          <div className="bg-white rounded-[40px] shadow-deep overflow-hidden">
+            {/* Upper part */}
+            <div className="p-8 md:p-12 text-center border-b-2 border-dashed border-slate-100 relative">
+              {/* Ticket notches */}
+              <div className="absolute -bottom-4 -left-4 w-8 h-8 bg-background rounded-full" />
+              <div className="absolute -bottom-4 -right-4 w-8 h-8 bg-background rounded-full" />
+              
+              <motion.div
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                className="inline-flex items-center gap-2 px-4 py-1.5 bg-green-50 rounded-full text-green-700 text-[10px] font-bold uppercase tracking-widest mb-6"
+              >
+                <Zap size={14} className="fill-green-700" />
+                Exclusive Offer
+              </motion.div>
+              
+              <h1 className="text-3xl md:text-5xl font-display font-bold text-slate-900 mb-4 tracking-tight">
+                {offer.title}
+              </h1>
+              <p className="text-slate-500 text-base md:text-lg max-w-lg mx-auto leading-relaxed">
+                {offer.desc}
+              </p>
             </div>
-            <div className="glass-card !rounded-xl px-3 py-2 flex items-center gap-2">
-              <Users size={14} className="text-green-600" />
-              <span className="text-xs md:text-sm text-app-text">{offer.uses} people used</span>
-            </div>
-          </div>
-        </div>
 
-        {/* How to Use */}
-        <div className="px-5 md:px-8 py-4 md:py-6 border-b border-green-50">
-          <h3 className="font-display font-bold text-base md:text-lg text-app-text mb-3">How to Use</h3>
-          <div className="space-y-2.5">
-            {['Visit the store', 'Show this offer to staff', 'Get instant discount'].map((step, i) => (
-              <div key={i} className="flex items-center gap-3">
-                <div className="w-7 h-7 md:w-9 md:h-9 rounded-lg gradient-accent flex items-center justify-center text-white font-display font-bold text-xs md:text-sm shadow-glow flex-shrink-0">
-                  {i + 1}
+            {/* Lower part */}
+            <div className="p-8 md:p-10 bg-slate-50/50 grid grid-cols-2 md:grid-cols-3 gap-8">
+              <div className="space-y-1">
+                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Valid Until</p>
+                <div className="flex items-center gap-2 text-slate-900 font-display font-bold">
+                  <Calendar size={16} className="text-green-600" />
+                  {formatDateLong(offer.validTill)}
                 </div>
-                <span className="text-sm md:text-base text-app-mid">{step}</span>
               </div>
-            ))}
+              <div className="space-y-1">
+                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Community</p>
+                <div className="flex items-center gap-2 text-slate-900 font-display font-bold">
+                  <Users size={16} className="text-green-600" />
+                  {offer.uses} claimed
+                </div>
+              </div>
+              <div className="space-y-1 col-span-2 md:col-span-1">
+                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Merchant Trust</p>
+                <div className="flex items-center gap-2 text-slate-900 font-display font-bold">
+                  <ShieldCheck size={16} className="text-green-600" />
+                  Verified Business
+                </div>
+              </div>
+            </div>
           </div>
         </div>
 
-        {/* Terms */}
-        <div className="px-5 md:px-8 py-4 md:py-6 border-b border-green-50">
-          <div onClick={() => setShowTerms(!showTerms)} className="flex items-center justify-between cursor-pointer">
-            <h3 className="font-display font-bold text-base md:text-lg text-app-text">Terms & Conditions</h3>
-            {showTerms ? <ChevronUp size={20} className="text-app-muted" /> : <ChevronDown size={20} className="text-app-muted" />}
+        {/* How to Use Section */}
+        <div className="px-5 md:px-8 py-12">
+          <div className="flex flex-col md:flex-row gap-12">
+            <div className="flex-1 space-y-8">
+              <div>
+                <h3 className="text-xl font-display font-bold text-slate-900 mb-6">How to Redeem</h3>
+                <div className="space-y-6">
+                  {[
+                    { title: 'Visit Store', desc: 'Go to the merchant location mentioned below', icon: MapPin },
+                    { title: 'Show QR', desc: 'Click on "Use Offer" and show the QR code to the staff', icon: Zap },
+                    { title: 'Save Instantly', desc: 'Merchant will scan and apply the discount to your bill', icon: Gift },
+                  ].map((step, i) => (
+                    <div key={i} className="flex gap-5">
+                      <div className="w-12 h-12 rounded-2xl bg-white shadow-soft border border-slate-50 flex items-center justify-center text-green-700 flex-shrink-0">
+                        <step.icon size={22} />
+                      </div>
+                      <div>
+                        <h4 className="font-display font-bold text-slate-900 text-base">{step.title}</h4>
+                        <p className="text-slate-500 text-sm mt-1">{step.desc}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            <div className="md:w-80 space-y-6">
+              <div className="bg-white rounded-[32px] p-6 border border-slate-100 shadow-sm">
+                <div onClick={() => setShowTerms(!showTerms)} className="flex items-center justify-between cursor-pointer group">
+                  <h3 className="font-display font-bold text-slate-900 group-hover:text-green-700 transition-colors">Terms & Conditions</h3>
+                  {showTerms ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
+                </div>
+                <AnimatePresence>
+                  {showTerms && (
+                    <motion.div 
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: 'auto', opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      className="overflow-hidden"
+                    >
+                      <div className="pt-4 space-y-3">
+                        {offer.terms.split('. ').map((term, i) => (
+                          <div key={i} className="flex gap-2 text-xs text-slate-500 leading-relaxed">
+                            <span className="text-green-600 font-bold">•</span>
+                            {term}
+                          </div>
+                        ))}
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+
+              <div className="bg-slate-900 rounded-[32px] p-6 text-white relative overflow-hidden">
+                <div className="relative z-10">
+                  <h4 className="font-display font-bold text-sm mb-2">Need Help?</h4>
+                  <p className="text-white/50 text-[10px] mb-4">Contact our support team for any issues with this offer.</p>
+                  <button 
+                    onClick={() => navigate('/profile/support')}
+                    className="w-full py-3 bg-white/10 hover:bg-white/20 rounded-xl text-xs font-bold transition-all"
+                  >
+                    Contact Support
+                  </button>
+                </div>
+                <div className="absolute -bottom-4 -right-4 w-24 h-24 bg-white/5 rounded-full blur-2xl" />
+              </div>
+            </div>
           </div>
-          {showTerms && (
-            <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} className="mt-3 space-y-1.5">
-              {offer.terms.split('. ').map((term, i) => (
-                <p key={i} className="text-sm md:text-base text-app-muted flex items-start gap-2">
-                  <span className="text-green-700 font-bold">•</span> {term.replace('.', '')}
+        </div>
+
+        {/* Merchant Info Section */}
+        <div className="px-5 md:px-8 pb-32">
+          <div className="bg-white rounded-[40px] p-8 md:p-10 border border-slate-100 shadow-sm flex flex-col md:flex-row gap-8 items-center">
+            <div className="w-24 h-24 md:w-32 md:h-32 rounded-[32px] overflow-hidden flex-shrink-0 shadow-xl">
+              <img src={merchant.image} alt={merchant.name} className="w-full h-full object-cover" />
+            </div>
+            <div className="flex-1 text-center md:text-left space-y-4">
+              <div>
+                <div className="flex items-center justify-center md:justify-start gap-3 mb-1">
+                  <h3 className="text-2xl font-display font-bold text-slate-900">{merchant.name}</h3>
+                  <div className="flex items-center gap-1 px-2 py-0.5 bg-green-50 text-green-700 text-[10px] font-bold rounded-md uppercase tracking-wider">
+                    <Star size={10} className="fill-green-700" /> {merchant.rating}
+                  </div>
+                </div>
+                <p className="text-slate-500 text-sm font-medium flex items-center justify-center md:justify-start gap-2">
+                  <MapPin size={14} className="text-green-600" />
+                  {(merchant as any).address || 'Golaghat, Assam'}
                 </p>
-              ))}
-            </motion.div>
-          )}
-        </div>
-
-        {/* About */}
-        <div className="px-5 md:px-8 py-4 md:py-6 border-b border-green-50">
-          <h3 className="font-display font-bold text-base md:text-lg text-app-text mb-2">About {merchant.name}</h3>
-          <p className="text-sm md:text-base text-app-muted flex items-center gap-2 mb-1"><MapPin size={14} className="text-green-600" /> {(merchant as any).address || 'Golaghat, Assam'}</p>
-          <p className="text-sm md:text-base text-app-muted flex items-center gap-2">📞 {(merchant as any).phone || '+91 98765 43210'}</p>
+              </div>
+              <div className="flex flex-wrap justify-center md:justify-start gap-4">
+                <div className="flex items-center gap-2 text-xs font-bold text-slate-400">
+                  <Clock size={14} /> Open until 10:00 PM
+                </div>
+                <div className="flex items-center gap-2 text-xs font-bold text-slate-400">
+                  <Heart size={14} className="text-red-500" /> 2.4k Favorites
+                </div>
+              </div>
+            </div>
+            <button className="px-8 py-4 bg-slate-50 text-slate-900 rounded-2xl font-display font-bold text-sm hover:bg-slate-100 transition-all border border-slate-100">
+              Visit Profile
+            </button>
+          </div>
         </div>
 
         {/* Sticky CTA */}

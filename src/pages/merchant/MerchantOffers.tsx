@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Plus, Edit3, Trash2, ToggleLeft, ToggleRight, Gift, Calendar, Users, ArrowRight, XCircle, Search, Sparkles, AlertCircle, Percent, Tag, Ticket, TrendingUp } from 'lucide-react';
-import MerchantLayout from '@/components/layout/MerchantLayout';
+import DashboardLayout from '@/components/layout/DashboardLayout';
 import { usePlatformData } from '@/context/PlatformDataContext';
 import { useAuth } from '@/context/AuthContext';
 import { toast } from 'sonner';
@@ -40,12 +40,23 @@ export default function MerchantOffers() {
       ...newOffer,
       value: Number(newOffer.value),
       uses: 0,
-      status: 'active'
+      status: 'pending', // SaaS flow: starts as pending
+      createdAt: new Date().toISOString()
     };
     addOffer(offer);
     setShowAddModal(false);
     setNewOffer({ title: '', desc: '', type: 'percent', value: '', validTill: '', terms: '' });
-    toast.success('New offer created successfully!');
+    toast.success('Offer submitted for approval!');
+  };
+
+  const getStatusColor = (status: string) => {
+    switch(status) {
+      case 'active': return 'bg-green-100 text-green-700 border-green-200';
+      case 'pending': return 'bg-amber-100 text-amber-700 border-amber-200';
+      case 'paused': return 'bg-gray-100 text-gray-700 border-gray-200';
+      case 'rejected': return 'bg-red-100 text-red-700 border-red-200';
+      default: return 'bg-gray-100 text-gray-700 border-gray-200';
+    }
   };
 
   const getOfferIcon = (type: string) => {
@@ -58,7 +69,7 @@ export default function MerchantOffers() {
   };
 
   return (
-    <MerchantLayout>
+    <DashboardLayout role="merchant">
       <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} className="space-y-8 pb-20">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div>
@@ -124,9 +135,7 @@ export default function MerchantOffers() {
 
               <div className="p-6 md:p-8 space-y-6">
                 <div className="flex items-start justify-between">
-                  <div className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest ${
-                    offer.status === 'active' ? 'bg-green-50 text-green-700' : 'bg-amber-50 text-amber-700'
-                  }`}>
+                  <div className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest border ${getStatusColor(offer.status)}`}>
                     {offer.status}
                   </div>
                   <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -160,19 +169,35 @@ export default function MerchantOffers() {
                     <div className="w-8 h-8 rounded-full bg-gray-50 flex items-center justify-center text-gray-400 group-hover:bg-green-50 group-hover:text-green-700 transition-colors">
                       <Calendar size={14} />
                     </div>
-                    <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Added 2 days ago</span>
+                    <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">
+                      {offer.createdAt ? `Added ${new Date(offer.createdAt).toLocaleDateString()}` : 'Added 2 days ago'}
+                    </span>
                   </div>
-                  <button 
-                    onClick={() => toggleStatus(offer.id)}
-                    className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-display font-bold transition-all shadow-sm ${
-                      offer.status === 'active' 
-                        ? 'bg-amber-50 text-amber-700 hover:bg-amber-100' 
-                        : 'bg-green-50 text-green-700 hover:bg-green-100'
-                    }`}
-                  >
-                    {offer.status === 'active' ? <ToggleRight size={18} /> : <ToggleLeft size={18} />}
-                    {offer.status === 'active' ? 'Pause' : 'Activate'}
-                  </button>
+                  {offer.status !== 'pending' && offer.status !== 'rejected' && (
+                    <button 
+                      onClick={() => toggleStatus(offer.id)}
+                      className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-display font-bold transition-all shadow-sm ${
+                        offer.status === 'active' 
+                          ? 'bg-amber-50 text-amber-700 hover:bg-amber-100' 
+                          : 'bg-green-50 text-green-700 hover:bg-green-100'
+                      }`}
+                    >
+                      {offer.status === 'active' ? <ToggleRight size={18} /> : <ToggleLeft size={18} />}
+                      {offer.status === 'active' ? 'Pause' : 'Activate'}
+                    </button>
+                  )}
+                  {offer.status === 'pending' && (
+                    <div className="flex items-center gap-1.5 text-amber-600 text-[10px] font-bold uppercase tracking-wider">
+                      <AlertCircle size={14} />
+                      Awaiting Approval
+                    </div>
+                  )}
+                  {offer.status === 'rejected' && (
+                    <div className="flex items-center gap-1.5 text-red-600 text-[10px] font-bold uppercase tracking-wider">
+                      <XCircle size={14} />
+                      Rejected
+                    </div>
+                  )}
                 </div>
               </div>
             </motion.div>
@@ -305,6 +330,6 @@ export default function MerchantOffers() {
           )}
         </AnimatePresence>
       </motion.div>
-    </MerchantLayout>
+    </DashboardLayout>
   );
 }

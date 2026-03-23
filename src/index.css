@@ -119,8 +119,23 @@
     background: linear-gradient(135deg, hsl(var(--green-700)) 0%, hsl(var(--green-900)) 100%);
   }
   .glass-card {
-    @apply bg-white/80 backdrop-blur-lg rounded-2xl border border-white/40;
-    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
+    @apply bg-white/80 backdrop-blur-xl border border-white shadow-xl shadow-black/[0.02];
+  }
+
+  .shadow-soft {
+    box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.04), 0 4px 12px -4px rgba(0, 0, 0, 0.02);
+  }
+
+  .shadow-deep {
+    box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.08), 0 8px 16px -6px rgba(0, 0, 0, 0.04);
+  }
+
+  .shadow-glow {
+    box-shadow: 0 12px 32px -8px rgba(45, 106, 79, 0.25);
+  }
+
+  .shadow-glow-lg {
+    box-shadow: 0 20px 48px -12px rgba(45, 106, 79, 0.35);
   }
   .gradient-primary {
     background: linear-gradient(135deg, #1B4332 0%, #2D6A4F 50%, #40916C 100%);
@@ -146,21 +161,27 @@
     animation: shimmer 1.5s infinite;
     border-radius: 8px;
   }
+  /* Sophisticated gradient text */
   .text-gradient {
-    background: linear-gradient(135deg, #2D6A4F, #40916C);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+    @apply bg-clip-text text-transparent bg-gradient-to-br from-slate-900 via-slate-800 to-green-900;
+  }
+
+  /* Micro-interactions */
+  .btn-press {
+    @apply active:scale-[0.97] transition-all duration-200;
   }
   .glow-green {
     box-shadow: 0 0 20px rgba(45, 106, 79, 0.2), 0 0 60px rgba(45, 106, 79, 0.1);
   }
   .hover-lift {
-    @apply transition-all duration-300;
+    @apply hover:-translate-y-1 hover:shadow-deep transition-all duration-300;
   }
-  .hover-lift:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.12);
+
+  /* Custom ticket cut for Offer Details */
+  .ticket-cut {
+    mask: radial-gradient(circle at 0 50%, transparent 12px, black 13px),
+          radial-gradient(circle at 100% 50%, transparent 12px, black 13px);
+    mask-composite: intersect;
   }
   /* Desktop utility classes */
   .desktop-stat-card {

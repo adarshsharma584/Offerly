@@ -1,13 +1,11 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { ShieldCheck, Lock, Mail, Eye, EyeOff, AlertTriangle } from 'lucide-react';
+import { ShieldCheck, Lock, Eye, EyeOff, AlertTriangle, Mail } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 
-const NAVY_HERO = 'linear-gradient(160deg, #020617 0%, #0f172a 45%, #1e1b4b 100%)';
-const NAVY_BUTTON = 'linear-gradient(135deg, #1e1b4b 0%, #312e81 55%, #4338ca 100%)';
-
 export default function AdminLoginPage() {
+  const NAVY_BUTTON = 'linear-gradient(135deg, #1e1b4b 0%, #312e81 50%, #4338ca 100%)';
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -26,8 +24,9 @@ export default function AdminLoginPage() {
       return;
     }
     setError('');
-    login(email, 'admin');
-    navigate('/admin');
+    localStorage.setItem('offerly_phone', email);
+    localStorage.setItem('offerly_login_role', 'admin');
+    navigate('/otp');
   };
 
   return (
@@ -37,51 +36,43 @@ export default function AdminLoginPage() {
       className="min-h-screen flex flex-col md:flex-row"
     >
       {/* Hero */}
-      <div
-        className="flex-[0_0_45%] md:flex-[0_0_48%] md:min-h-screen flex flex-col items-center justify-center relative overflow-hidden"
-        style={{ background: NAVY_HERO }}
-      >
+      <div className="flex-[0_0_45%] md:flex-[0_0_48%] md:min-h-screen flex flex-col items-center justify-center relative overflow-hidden gradient-hero">
         <div
-          className="absolute inset-0 opacity-25"
+          className="absolute inset-0 opacity-30"
           style={{
             background:
-              'radial-gradient(circle at 30% 20%, rgba(79,70,229,0.35) 0%, transparent 50%), radial-gradient(circle at 70% 80%, rgba(30,27,75,0.4) 0%, transparent 50%)',
+              'radial-gradient(circle at 30% 20%, rgba(82,183,136,0.4) 0%, transparent 50%), radial-gradient(circle at 70% 80%, rgba(64,145,108,0.3) 0%, transparent 50%)',
           }}
         />
 
-        <motion.div
-          initial={{ scale: 0.8, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          transition={{ delay: 0.2, duration: 0.5 }}
-          className="relative z-10 flex flex-col items-center px-6 text-center"
-        >
-          <div className="w-20 h-20 md:w-24 md:h-24 rounded-3xl bg-white/10 backdrop-blur-xl flex items-center justify-center mb-5 border border-white/15">
-            <ShieldCheck size={42} className="text-indigo-100" />
+        <div className="relative z-10 flex flex-col items-center px-6 text-center">
+          <div className="w-20 h-20 md:w-24 md:h-24 rounded-3xl bg-white/15 backdrop-blur-xl flex items-center justify-center mb-6 border border-white/20">
+            <ShieldCheck size={40} className="text-white" />
           </div>
 
-          <h1 className="font-display font-bold text-3xl md:text-4xl text-white tracking-tight">
+          <h1 className="font-display font-bold text-4xl md:text-5xl text-white tracking-tight">
             OFFERLY
           </h1>
-          <div className="bg-indigo-400/15 backdrop-blur-md rounded-full px-4 py-1.5 border border-indigo-200/20 mt-3 mb-4">
-            <p className="text-indigo-100 text-[10px] font-display font-bold uppercase tracking-widest">
+          <div className="bg-white/10 backdrop-blur-md rounded-full px-4 py-1.5 border border-white/20 mt-3 mb-6">
+            <p className="text-white text-[10px] font-display font-bold uppercase tracking-widest">
               Admin Console
             </p>
           </div>
 
-          <h2 className="font-display font-bold text-2xl md:text-3xl text-white leading-tight max-w-[260px]">
+          <h2 className="font-display font-bold text-2xl md:text-3xl text-white leading-tight max-w-[280px]">
             Central Control Center
           </h2>
-          <p className="text-indigo-100/65 text-sm mt-3 max-w-[240px]">
+          <p className="text-white/70 text-sm mt-3 max-w-[260px]">
             Manage users, merchants, and offers with secure admin access
           </p>
 
-          <div className="hidden md:flex items-center gap-3 mt-10 bg-white/10 backdrop-blur-xl rounded-2xl px-4 py-3 border border-white/10">
-            <Lock size={16} className="text-indigo-200" />
+          <div className="hidden md:flex items-center gap-3 mt-10 bg-white/10 backdrop-blur-xl rounded-2xl px-6 py-3 border border-white/10">
+            <Lock size={16} className="text-white/80" />
             <p className="text-white/80 text-xs font-display tracking-wide">
               Secure session · Role-based access
             </p>
           </div>
-        </motion.div>
+        </div>
       </div>
 
       {/* Form */}
@@ -97,13 +88,12 @@ export default function AdminLoginPage() {
             {/* Desktop logo */}
             <div className="hidden md:flex items-center gap-2 mb-8">
               <div
-                className="w-8 h-8 rounded-xl flex items-center justify-center"
-                style={{ background: NAVY_BUTTON }}
+                className="w-8 h-8 rounded-xl flex items-center justify-center bg-green-700"
               >
                 <ShieldCheck size={16} className="text-white" />
               </div>
               <span className="font-display font-bold text-lg text-slate-900">OFFERLY</span>
-              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full ml-1 bg-indigo-100 text-indigo-700">
+              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full ml-1 bg-green-100 text-green-700">
                 Admin
               </span>
             </div>

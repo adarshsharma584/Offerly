@@ -8,6 +8,7 @@ interface PlatformData {
   redemptions: any[];
   liveActivity: any[];
   users: any[];
+  tickets: any[];
 }
 
 interface PlatformDataContextType {
@@ -18,6 +19,8 @@ interface PlatformDataContextType {
   addOffer: (offer: any) => void;
   addMerchant: (merchant: any) => void;
   updateUser: (id: string, updates: any) => void;
+  addTicket: (ticket: any) => void;
+  updateTicket: (id: string, updates: any) => void;
 }
 
 const PlatformDataContext = createContext<PlatformDataContextType | null>(null);
@@ -28,6 +31,10 @@ export function PlatformDataProvider({ children }: { children: ReactNode }) {
   const [redemptions, setRedemptions] = useLocalStorage('offerly_redemptions_all', REDEMPTION_HISTORY);
   const [liveActivity, setLiveActivity] = useLocalStorage('offerly_live_activity', LIVE_ACTIVITY);
   const [users, setUsers] = useLocalStorage('offerly_users', MOCK_USERS);
+  const [tickets, setTickets] = useLocalStorage('offerly_tickets', [
+    { id: 'T1', userId: 'U1', userName: 'Adarsh Kashyap', subject: 'Offer Redemption Issue', message: 'The QR code at Cafe Delight was not working properly.', status: 'pending', createdAt: '2026-03-22T08:30:00Z' },
+    { id: 'T2', userId: 'U2', userName: 'Priya Das', subject: 'Merchant Feedback', message: 'Burger King staff was very helpful with the Offerly discount.', status: 'resolved', createdAt: '2026-03-21T14:20:00Z' },
+  ]);
 
   const updateMerchant = (id: string, updates: any) => {
     setMerchants(prev => prev.map(m => m.id === id ? { ...m, ...updates } : m));
@@ -61,15 +68,25 @@ export function PlatformDataProvider({ children }: { children: ReactNode }) {
     setUsers(prev => prev.map(u => u.id === id ? { ...u, ...updates } : u));
   };
 
+  const addTicket = (ticket: any) => {
+    setTickets(prev => [ticket, ...prev]);
+  };
+
+  const updateTicket = (id: string, updates: any) => {
+    setTickets(prev => prev.map(t => t.id === id ? { ...t, ...updates } : t));
+  };
+
   return (
     <PlatformDataContext.Provider value={{
-      data: { merchants, offers, redemptions, liveActivity, users },
+      data: { merchants, offers, redemptions, liveActivity, users, tickets },
       updateMerchant,
       updateOffer,
       addRedemption,
       addOffer,
       addMerchant,
-      updateUser
+      updateUser,
+      addTicket,
+      updateTicket
     }}>
       {children}
     </PlatformDataContext.Provider>

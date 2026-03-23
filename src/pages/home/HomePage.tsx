@@ -1,7 +1,12 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Search, Sparkles, MapPin, ArrowRight, Star, Gift, Utensils, Scissors, Store, Dumbbell, Wrench, Plus, ChevronLeft, ChevronRight, TrendingUp, Users, Bookmark, Trophy, Zap, Clock, ShieldCheck, Heart } from 'lucide-react';
+import { 
+  Search, Sparkles, MapPin, ArrowRight, Star, Gift, 
+  Utensils, Scissors, Store, Dumbbell, Wrench, Plus, 
+  ChevronLeft, ChevronRight, TrendingUp, Users, Bookmark, 
+  Trophy, Zap, Clock, ShieldCheck, Heart, Share2, ArrowUpRight
+} from 'lucide-react';
 import { MERCHANTS, OFFERS } from '@/data/mockData';
 import { useOffers } from '@/hooks/useOffers';
 import AppShell from '@/components/layout/AppShell';
@@ -31,26 +36,58 @@ const heroSlides = [
     title: "Save More on Everything You Love",
     desc: "Explore exclusive offers from trusted local merchants. From food to fitness, find the best deals near you.",
     badge: "Discover Local Deals",
-    gradient: "from-green-700 via-green-600 to-emerald-600"
+    gradient: "from-green-700 via-green-600 to-emerald-600",
+    image: "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=1200&auto=format&fit=crop"
   },
   {
     title: "Best Local Offers, Just for You",
     desc: "Unbeatable discounts at your favorite neighborhood spots. Verified merchants and daily updates.",
     badge: "Daily Updates",
-    gradient: "from-emerald-700 via-emerald-600 to-teal-600"
+    gradient: "from-emerald-700 via-emerald-600 to-teal-600",
+    image: "https://images.unsplash.com/photo-1521737604893-d14cc237f11d?w=1200&auto=format&fit=crop"
   },
   {
     title: "Support Local, Save Big",
     desc: "Helping local businesses grow while you save money. Join the community and start exploring today.",
     badge: "Community First",
-    gradient: "from-green-800 via-green-700 to-emerald-700"
+    gradient: "from-green-800 via-green-700 to-emerald-700",
+    image: "https://images.unsplash.com/photo-1531050171669-7df9b90969a6?w=1200&auto=format&fit=crop"
   }
 ];
 
+import { OfferCardSkeleton, MerchantCardSkeleton } from '@/components/ui/Skeletons';
+import { Skeleton } from '@/components/ui/skeleton';
+
+const RecentSavingsTicker = () => (
+  <div className="bg-green-50 border-y border-green-100 py-2.5 overflow-hidden whitespace-nowrap relative z-10">
+    <div className="flex animate-marquee gap-10">
+      {[
+        "Rahul saved ₹500 at Cafe Delight",
+        "Priya claimed 20% OFF at Burger King",
+        "Adarsh saved ₹1,200 on Gym Membership",
+        "Sneha got BOGO at Lakme Salon",
+        "Offerly reached 10,000+ local savers today!"
+      ].map((text, i) => (
+        <div key={i} className="flex items-center gap-2 text-[10px] md:text-xs font-bold text-green-700 uppercase tracking-widest">
+          <span className="w-1.5 h-1.5 bg-green-600 rounded-full animate-pulse" />
+          {text}
+        </div>
+      ))}
+    </div>
+  </div>
+);
+
 export default function HomePage() {
+  const [loading, setLoading] = useState(true);
   const [activeCat, setActiveCat] = useState('all');
   const [currentHero, setCurrentHero] = useState(0);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    // Simulate initial data fetch
+    const timer = setTimeout(() => setLoading(false), 1200);
+    return () => clearTimeout(timer);
+  }, []);
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -60,165 +97,125 @@ export default function HomePage() {
   }, []);
 
   const sortedOffers = useOffers(activeCat);
-  const featuredOffer = sortedOffers[0];
-  const featuredMerchant = MERCHANTS.find(m => m.id === featuredOffer?.merchantId);
   const topMerchants = MERCHANTS.filter(m => m.isVerified).slice(0, 6);
+
+  if (loading) {
+    return (
+      <AppShell>
+        <div className="max-w-6xl mx-auto px-5 pt-4 space-y-12">
+          <Skeleton className="h-64 w-full rounded-[32px]" />
+          <div className="grid grid-cols-6 gap-4">
+            {[1, 2, 3, 4, 5, 6].map(i => <Skeleton key={i} className="h-24 rounded-2xl" />)}
+          </div>
+          <div className="space-y-6">
+            <Skeleton className="h-8 w-48 rounded-lg" />
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              {[1, 2, 3, 4].map(i => <OfferCardSkeleton key={i} />)}
+            </div>
+          </div>
+        </div>
+      </AppShell>
+    );
+  }
 
   return (
     <AppShell>
-      <motion.div variants={pageVariants} initial="initial" animate="animate" className="pb-12">
-        {/* Desktop Hero Section - Sliding Banners */}
-        <div className="hidden md:block mb-10 relative group">
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={currentHero}
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -20 }}
-              transition={{ duration: 0.5, ease: "easeInOut" }}
-              className={`bg-gradient-to-br ${heroSlides[currentHero].gradient} rounded-[32px] p-8 lg:p-10 relative overflow-hidden shadow-xl min-h-[300px] flex items-center`}
-            >
-              {/* Background patterns */}
-              <div className="absolute top-0 right-0 w-96 h-96 bg-white/5 rounded-full -mr-32 -mt-32 blur-3xl" />
-              <div className="absolute bottom-0 left-0 w-64 h-64 bg-emerald-500/10 rounded-full -ml-32 -mb-32 blur-3xl" />
-              
-              <div className="relative z-10 flex items-center justify-between gap-10 w-full">
-                <div className="max-w-xl">
-                  <motion.div 
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.2 }}
-                    className="inline-flex items-center gap-2 px-4 py-1.5 bg-white/10 rounded-full border border-white/20 text-white text-[10px] font-bold uppercase tracking-widest mb-4"
-                  >
-                    <Sparkles size={12} />
-                    {heroSlides[currentHero].badge}
-                  </motion.div>
-                  <motion.h1 
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.3 }}
-                    className="text-3xl lg:text-4xl font-display font-bold text-white mb-4 leading-tight"
-                  >
-                    {heroSlides[currentHero].title}
-                  </motion.h1>
-                  <motion.p 
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.4 }}
-                    className="text-base text-green-50/80 mb-6 leading-relaxed max-w-lg"
-                  >
-                    {heroSlides[currentHero].desc}
-                  </motion.p>
-                  
-                  {/* Desktop Search Bar */}
-                  <div className="relative max-w-lg">
-                    <Search className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
-                    <input
-                      type="text"
-                      onClick={() => navigate('/explore?focus=true')}
-                      placeholder="Search for shops, restaurants, services..."
-                      className="w-full bg-white py-3.5 pl-14 pr-6 text-sm text-gray-700 rounded-2xl border-0 focus:outline-none focus:ring-4 focus:ring-white/20 shadow-xl cursor-pointer"
-                      readOnly
-                    />
-                  </div>
-                </div>
-
-                {/* Hero Featured Card - Laptop Only */}
-                <div className="hidden lg:block w-64 flex-shrink-0">
-                  <motion.div 
-                    initial={{ opacity: 0, scale: 0.9, x: 20 }}
-                    animate={{ opacity: 1, scale: 1, x: 0 }}
-                    transition={{ delay: 0.3 }}
-                    className="bg-white/10 backdrop-blur-xl rounded-3xl p-5 border border-white/20 shadow-2xl rotate-3 hover:rotate-0 transition-transform duration-500"
-                  >
-                    <div className="flex items-center gap-3 mb-4">
-                      <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center text-green-700 font-bold text-lg">S</div>
-                      <div>
-                        <h4 className="text-white font-display font-bold text-xs">Style Salon</h4>
-                        <p className="text-white/60 text-[9px]">900m away</p>
-                      </div>
-                    </div>
-                    <h3 className="text-white font-display font-bold text-base mb-4 leading-tight">30% OFF on all services</h3>
-                    <button className="w-full py-2.5 bg-white text-green-700 rounded-xl font-display font-bold text-[10px] shadow-lg">
-                      Claim Deal
-                    </button>
-                  </motion.div>
-                </div>
-              </div>
-            </motion.div>
-          </AnimatePresence>
-
-          {/* Dots */}
-          <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex gap-2 z-20">
-            {heroSlides.map((_, i) => (
-              <button
-                key={i}
-                onClick={() => setCurrentHero(i)}
-                className={`h-1.5 rounded-full transition-all duration-300 ${
-                  i === currentHero ? 'w-8 bg-white' : 'w-1.5 bg-white/30'
-                }`}
-              />
-            ))}
-          </div>
-
-          {/* Navigation Arrows */}
-          <button 
-            onClick={() => setCurrentHero((prev) => (prev - 1 + heroSlides.length) % heroSlides.length)}
-            className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/10 backdrop-blur-md border border-white/10 flex items-center justify-center text-white opacity-0 group-hover:opacity-100 transition-opacity hover:bg-white/20"
-          >
-            <ChevronLeft size={20} />
-          </button>
-          <button 
-            onClick={() => setCurrentHero((prev) => (prev + 1) % heroSlides.length)}
-            className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/10 backdrop-blur-md border border-white/10 flex items-center justify-center text-white opacity-0 group-hover:opacity-100 transition-opacity hover:bg-white/20"
-          >
-            <ChevronRight size={20} />
-          </button>
-        </div>
-
-        {/* Mobile Search Bar and Categories - Only visible on mobile */}
-        <div className="md:hidden bg-white px-5 pb-4">
-          {/* Search Bar */}
-          <div 
-            onClick={() => navigate('/explore?focus=true')} 
-            className="relative cursor-pointer mb-4"
-          >
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
-            <input
-              type="text"
-              placeholder="Search shops, food, services..."
-              className="w-full bg-gray-50 py-3.5 pl-12 pr-4 text-sm text-gray-600 rounded-2xl border-0 focus:outline-none focus:ring-2 focus:ring-green-500"
-              readOnly
-            />
-          </div>
-
-          {/* Top Offer Near You Header */}
-          <div className="flex items-center justify-between mb-3">
-            <h3 className="font-display font-bold text-gray-900">Top Offer Near You</h3>
-            <button 
-              onClick={() => navigate('/explore')}
-              className="text-green-700 text-sm font-semibold flex items-center gap-1"
-            >
-              View All <ArrowRight size={16} />
-            </button>
-          </div>
-
-          {/* Category Chips */}
-          <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
-            {categories.map((cat) => (
-              <button
-                key={cat.id}
-                onClick={() => setActiveCat(cat.id)}
-                className={`flex items-center gap-2 px-4 py-2.5 rounded-xl whitespace-nowrap transition-all ${
-                  activeCat === cat.id 
-                    ? 'bg-green-700 text-white shadow-md' 
-                    : `${cat.bg} ${cat.color}`
-                }`}
+      <RecentSavingsTicker />
+      <motion.div 
+        initial={{ opacity: 0 }} 
+        animate={{ opacity: 1 }}
+        className="max-w-7xl mx-auto md:px-8 lg:px-12"
+      >
+        {/* Modern Hero Section */}
+        <div className="relative h-[480px] md:h-[540px] mt-6 px-5 md:px-0 mb-16">
+          <div className="w-full h-full rounded-[48px] overflow-hidden relative shadow-2xl">
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={currentHero}
+                initial={{ opacity: 0, scale: 1.1 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.95 }}
+                transition={{ duration: 1, ease: "easeOut" }}
+                className="absolute inset-0"
               >
-                <cat.icon size={18} />
-                <span className="font-display font-semibold text-sm">{cat.label}</span>
+                <img 
+                  src={heroSlides[currentHero].image || "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=1200&auto=format&fit=crop"} 
+                  className="w-full h-full object-cover" 
+                  alt="Hero"
+                />
+                <div className="absolute inset-0 bg-gradient-to-tr from-slate-900/90 via-slate-900/40 to-transparent" />
+              </motion.div>
+            </AnimatePresence>
+
+            <div className="absolute inset-0 flex flex-col justify-end p-8 md:p-16">
+              <div className="max-w-2xl space-y-6">
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.5 }}
+                  className="inline-flex items-center gap-2 px-4 py-1.5 bg-green-500/20 backdrop-blur-md border border-white/20 rounded-full text-white text-[10px] md:text-xs font-bold uppercase tracking-[0.2em]"
+                >
+                  <Sparkles size={14} className="text-green-400" />
+                  {heroSlides[currentHero].badge}
+                </motion.div>
+                
+                <motion.h1 
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.6 }}
+                  className="text-4xl md:text-6xl font-display font-bold text-white leading-tight"
+                >
+                  {heroSlides[currentHero].title}
+                </motion.h1>
+                
+                <motion.p 
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.7 }}
+                  className="text-white/70 text-base md:text-lg max-w-lg leading-relaxed font-medium"
+                >
+                  {heroSlides[currentHero].desc}
+                </motion.p>
+
+                <motion.div 
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.8 }}
+                  className="flex flex-col sm:flex-row gap-4 pt-4"
+                >
+                  <button 
+                    onClick={() => navigate('/explore')}
+                    className="px-10 py-5 bg-green-600 text-white rounded-2xl font-display font-bold shadow-xl shadow-green-900/40 hover:bg-green-700 transition-all hover:-translate-y-1 btn-press flex items-center justify-center gap-3"
+                  >
+                    Start Exploring <ArrowRight size={20} />
+                  </button>
+                  <div className="flex -space-x-3 items-center">
+                    {[1,2,3,4].map(i => (
+                      <div key={i} className="w-10 h-10 rounded-full border-2 border-white bg-slate-200 overflow-hidden shadow-sm">
+                        <img src={`https://i.pravatar.cc/150?u=${i+10}`} alt="User" />
+                      </div>
+                    ))}
+                    <span className="pl-6 text-white/80 text-xs font-bold uppercase tracking-widest">10k+ local savers</span>
+                  </div>
+                </motion.div>
+              </div>
+            </div>
+
+            {/* Slider Controls */}
+            <div className="absolute bottom-8 right-8 flex gap-3">
+              <button 
+                onClick={() => setCurrentHero(prev => (prev - 1 + heroSlides.length) % heroSlides.length)}
+                className="w-12 h-12 rounded-2xl bg-white/10 backdrop-blur-md border border-white/20 text-white flex items-center justify-center hover:bg-white/20 transition-all"
+              >
+                <ChevronLeft size={20} />
               </button>
-            ))}
+              <button 
+                onClick={() => setCurrentHero(prev => (prev + 1) % heroSlides.length)}
+                className="w-12 h-12 rounded-2xl bg-white/10 backdrop-blur-md border border-white/20 text-white flex items-center justify-center hover:bg-white/20 transition-all"
+              >
+                <ChevronRight size={20} />
+              </button>
+            </div>
           </div>
         </div>
 
@@ -481,6 +478,117 @@ export default function HomePage() {
                 </div>
               </div>
             </div>
+          </div>
+        </div>
+
+        {/* Phase 11: Community Engagement - Leaderboard & Referrals */}
+        <div className="px-5 md:px-0 mb-12">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+            
+            {/* Top Savers Leaderboard */}
+            <div className="lg:col-span-5">
+              <div className="bg-white rounded-[40px] border border-slate-100 shadow-xl shadow-black/[0.02] p-8 h-full">
+                <div className="flex items-center justify-between mb-8">
+                  <div>
+                    <h2 className="text-xl font-display font-bold text-slate-900">Top Savers</h2>
+                    <p className="text-slate-400 text-xs mt-1">This week's biggest discount hunters</p>
+                  </div>
+                  <div className="w-10 h-10 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center">
+                    <Trophy size={20} />
+                  </div>
+                </div>
+
+                <div className="space-y-5">
+                  {[
+                    { name: 'Rahul Boro', saved: 4520, claims: 12, rank: 1, avatar: 'RB' },
+                    { name: 'Priya Das', saved: 3850, claims: 9, rank: 2, avatar: 'PD' },
+                    { name: 'Adarsh K.', saved: 2900, claims: 15, rank: 3, avatar: 'AK' },
+                    { name: 'Sneha Roy', saved: 2100, claims: 6, rank: 4, avatar: 'SR' },
+                  ].map((user, i) => (
+                    <div key={user.name} className="flex items-center justify-between group cursor-pointer">
+                      <div className="flex items-center gap-4">
+                        <div className="relative">
+                          <div className={`w-12 h-12 rounded-2xl flex items-center justify-center font-display font-bold text-sm ${
+                            i === 0 ? 'bg-amber-100 text-amber-700' : 
+                            i === 1 ? 'bg-slate-100 text-slate-600' :
+                            i === 2 ? 'bg-orange-100 text-orange-700' : 'bg-slate-50 text-slate-400'
+                          }`}>
+                            {user.avatar}
+                          </div>
+                          <div className={`absolute -top-2 -right-2 w-6 h-6 rounded-full border-2 border-white flex items-center justify-center text-[10px] font-bold ${
+                            i === 0 ? 'bg-amber-400 text-white' : 'bg-slate-200 text-slate-600'
+                          }`}>
+                            {user.rank}
+                          </div>
+                        </div>
+                        <div>
+                          <h4 className="font-display font-bold text-sm text-slate-900 group-hover:text-green-700 transition-colors">{user.name}</h4>
+                          <p className="text-slate-400 text-[10px] font-bold uppercase tracking-widest">{user.claims} Claims</p>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-green-700 font-display font-bold">₹{user.saved}</p>
+                        <p className="text-slate-300 text-[10px] font-bold uppercase tracking-widest">Saved</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                <button className="w-full mt-8 py-4 bg-slate-50 text-slate-500 rounded-2xl font-display font-bold text-xs hover:bg-green-50 hover:text-green-700 transition-all">
+                  View Full Leaderboard
+                </button>
+              </div>
+            </div>
+
+            {/* Refer & Earn UI */}
+            <div className="lg:col-span-7">
+              <div className="bg-gradient-to-br from-green-700 to-green-900 rounded-[40px] p-8 md:p-12 relative overflow-hidden h-full shadow-2xl">
+                {/* Visual elements */}
+                <div className="absolute top-0 right-0 w-80 h-80 bg-white/5 rounded-full -mr-32 -mt-32 blur-3xl" />
+                <div className="absolute bottom-0 left-0 w-64 h-64 bg-emerald-500/10 rounded-full -ml-32 -mb-32 blur-3xl" />
+                
+                <div className="relative z-10 grid grid-cols-1 md:grid-cols-2 gap-10 items-center h-full">
+                  <div className="space-y-6">
+                    <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-white/10 rounded-full border border-white/20 text-white text-[10px] font-bold uppercase tracking-widest">
+                      <Users size={12} />
+                      Limited Time Offer
+                    </div>
+                    <h2 className="text-3xl md:text-4xl font-display font-bold text-white leading-tight">
+                      Friends Save,<br/>You <span className="text-green-400">Earn.</span>
+                    </h2>
+                    <p className="text-green-100/70 text-sm leading-relaxed">
+                      Invite your friends to Offerly. When they claim their first offer, you both get 100 bonus coins!
+                    </p>
+                    <div className="flex gap-3">
+                      <div className="flex-1 bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl px-5 py-4 flex items-center justify-between group cursor-pointer hover:bg-white/20 transition-all">
+                        <span className="text-white font-display font-bold text-sm tracking-widest uppercase">OFFERLY50</span>
+                        <span className="text-green-400 text-[10px] font-bold uppercase tracking-widest">Copy</span>
+                      </div>
+                      <button className="w-14 h-14 rounded-2xl bg-white text-green-700 flex items-center justify-center shadow-xl hover:scale-105 transition-transform">
+                        <Share2 size={24} />
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="hidden md:flex flex-col gap-4">
+                    {[
+                      { icon: '🎁', title: 'Share your code', desc: 'Invite friends via WhatsApp' },
+                      { icon: '📱', title: 'Friend signs up', desc: 'Using your referral link' },
+                      { icon: '💰', title: 'Both get rewarded', desc: 'Instantly in your wallet' },
+                    ].map((step, i) => (
+                      <div key={i} className="bg-white/5 border border-white/10 rounded-3xl p-5 flex items-center gap-4 hover:bg-white/10 transition-colors">
+                        <span className="text-2xl">{step.icon}</span>
+                        <div>
+                          <h4 className="text-white font-display font-bold text-sm">{step.title}</h4>
+                          <p className="text-green-100/50 text-[10px]">{step.desc}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+
           </div>
         </div>
       </motion.div>

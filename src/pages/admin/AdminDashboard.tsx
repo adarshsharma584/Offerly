@@ -4,7 +4,7 @@ import {
   AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, 
   Cell, RadialBarChart, RadialBar, Legend 
 } from 'recharts';
-import AdminLayout from '@/components/layout/AdminLayout';
+import DashboardLayout from '@/components/layout/DashboardLayout';
 import { usePlatformData } from '@/context/PlatformDataContext';
 
 const revenueData = [
@@ -23,17 +23,33 @@ const revenueData = [
 ];
 
 const bookingTrendData = [
-  { name: 'Mon', bookings: 120 },
-  { name: 'Tue', bookings: 150 },
-  { name: 'Wed', bookings: 130 },
-  { name: 'Thu', bookings: 180 },
-  { name: 'Fri', bookings: 240 },
-  { name: 'Sat', bookings: 210 },
-  { name: 'Sun', bookings: 190 },
+  { name: 'Mon', bookings: 120, users: 450 },
+  { name: 'Tue', bookings: 150, users: 520 },
+  { name: 'Wed', bookings: 130, users: 480 },
+  { name: 'Thu', bookings: 180, users: 610 },
+  { name: 'Fri', bookings: 240, users: 750 },
+  { name: 'Sat', bookings: 210, users: 890 },
+  { name: 'Sun', bookings: 190, users: 820 },
+];
+
+const cityData = [
+  { city: 'Golaghat', merchants: 124, active: 85 },
+  { city: 'Jorhat', merchants: 86, active: 62 },
+  { city: 'Guwahati', merchants: 210, active: 145 },
+  { city: 'Tezpur', merchants: 54, active: 38 },
 ];
 
 const sparklineData = [
   { v: 30 }, { v: 45 }, { v: 35 }, { v: 55 }, { v: 40 }, { v: 65 }, { v: 50 }
+];
+
+const COLORS = ['#2D6A4F', '#40916C', '#52B788', '#74C69D', '#95D5B2'];
+
+const systemStatus = [
+  { label: 'API Gateway', status: 'Online', latency: '12ms', color: 'bg-green-500' },
+  { label: 'Payment Engine', status: 'Healthy', latency: '45ms', color: 'bg-green-500' },
+  { label: 'Auth Service', status: 'Online', latency: '8ms', color: 'bg-green-500' },
+  { label: 'Cloud Storage', status: 'Online', latency: '22ms', color: 'bg-green-500' },
 ];
 
 export default function AdminDashboard() {
@@ -42,11 +58,11 @@ export default function AdminDashboard() {
 
   const totalRevenue = redemptions.reduce((acc, item) => acc + item.billAmount, 0) || 1245000;
   const totalCommission = Math.round(totalRevenue * 0.12);
-  const approvedMerchants = merchants.filter(m => m.status === 'approved');
+  const approvedMerchants = merchants.filter(m => m.status === 'approved' || m.status === 'verified');
   const pendingMerchants = merchants.filter(m => m.status === 'pending');
-  const pendingOffers = offers.filter(o => o.status !== 'active');
-  const cancellationRate = `${Math.max(1, Math.round((pendingOffers.length / Math.max(offers.length, 1)) * 100))}%`;
+  const pendingOffers = offers.filter(o => o.status === 'pending');
   const activeOffers = offers.filter(o => o.status === 'active');
+  const cancellationRate = `${Math.max(1, Math.round((pendingOffers.length / Math.max(offers.length, 1)) * 100))}%`;
 
   const kpis = [
     { label: 'Total Revenue', value: `₹${totalRevenue.toLocaleString()}`, icon: DollarSign, badge: '+18%', tone: 'bg-green-50 text-green-700 border-green-100' },
@@ -65,7 +81,7 @@ export default function AdminDashboard() {
   ];
 
   return (
-    <AdminLayout>
+    <DashboardLayout role="admin">
       <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="space-y-8">
         <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-6">
           <div>
@@ -242,8 +258,65 @@ export default function AdminDashboard() {
               </div>
             </div>
           </div>
+
+          {/* City Distribution & Growth */}
+          <div className="xl:col-span-4 space-y-6">
+            <div className="bg-white rounded-[32px] border border-gray-50 p-8 shadow-sm">
+              <h3 className="font-display font-bold text-xl text-app-text mb-6">Market Share</h3>
+              <div className="h-64">
+                <ResponsiveContainer width="100%" height="100%">
+                  <RadialBarChart cx="50%" cy="50%" innerRadius="30%" outerRadius="100%" barSize={10} data={cityData}>
+                    <RadialBar
+                      label={{ position: 'insideStart', fill: '#fff', fontSize: 10 }}
+                      background
+                      dataKey="active"
+                    >
+                      {cityData.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                      ))}
+                    </RadialBar>
+                    <Tooltip contentStyle={{ borderRadius: '12px', border: 'none' }} />
+                    <Legend iconSize={10} layout="vertical" verticalAlign="middle" align="right" wrapperStyle={{fontSize: '10px', fontWeight: 'bold'}} />
+                  </RadialBarChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
+
+            <div className="bg-green-700 rounded-[32px] p-8 text-white shadow-xl shadow-green-900/20 relative overflow-hidden">
+              <div className="relative z-10">
+                <p className="text-green-200 text-[10px] font-bold uppercase tracking-widest mb-1">Growth Target</p>
+                <h3 className="text-3xl font-display font-bold mb-4">84% Achieved</h3>
+                <div className="w-full bg-white/10 h-2 rounded-full mb-6">
+                  <div className="bg-white h-full rounded-full" style={{ width: '84%' }} />
+                </div>
+                <button className="w-full py-3 bg-white text-green-700 rounded-xl font-display font-bold text-sm hover:bg-green-50 transition-colors">
+                  View Full Report
+                </button>
+              </div>
+              <Activity className="absolute -bottom-4 -right-4 w-32 h-32 text-white/5" />
+            </div>
+
+            {/* System Status */}
+            <div className="bg-white rounded-[32px] border border-gray-50 p-8 shadow-sm">
+              <div className="flex items-center justify-between mb-6">
+                <h3 className="font-display font-bold text-xl text-app-text">Infrastructure</h3>
+                <span className="text-[10px] font-bold text-green-600 uppercase tracking-widest bg-green-50 px-2 py-1 rounded-md">Optimal</span>
+              </div>
+              <div className="space-y-4">
+                {systemStatus.map((service) => (
+                  <div key={service.label} className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className={`w-1.5 h-1.5 rounded-full ${service.color}`} />
+                      <span className="text-xs font-bold text-slate-600">{service.label}</span>
+                    </div>
+                    <span className="text-[10px] font-display font-bold text-slate-400">{service.latency}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
         </div>
       </motion.div>
-    </AdminLayout>
+    </DashboardLayout>
   );
 }

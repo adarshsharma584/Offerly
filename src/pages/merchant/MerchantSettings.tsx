@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion';
 import { Settings, Clock, Bell, CreditCard, Users, HelpCircle, ArrowRight, Save, User, ShieldCheck } from 'lucide-react';
-import MerchantLayout from '@/components/layout/MerchantLayout';
+import DashboardLayout from '@/components/layout/DashboardLayout';
 import { toast } from 'sonner';
 
 export default function MerchantSettings() {
@@ -39,7 +39,7 @@ export default function MerchantSettings() {
   ];
 
   return (
-    <MerchantLayout>
+    <DashboardLayout role="merchant">
       <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} className="space-y-8 pb-20 max-w-4xl mx-auto">
         <div className="flex items-center justify-between">
           <div>
@@ -113,6 +113,6 @@ export default function MerchantSettings() {
           </div>
         </div>
       </motion.div>
-    </MerchantLayout>
+    </DashboardLayout>
   );
 }

@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion';
 import { MapPin, Phone, Star, CheckCircle2, Camera, Store, Globe } from 'lucide-react';
-import MerchantLayout from '@/components/layout/MerchantLayout';
+import DashboardLayout from '@/components/layout/DashboardLayout';
 import { useAuth } from '@/context/AuthContext';
 import { usePlatformData } from '@/context/PlatformDataContext';
 import { toast } from 'sonner';
@@ -18,17 +18,17 @@ export default function MerchantStore() {
 
   if (!merchant) {
     return (
-      <MerchantLayout>
+      <DashboardLayout role="merchant">
         <div className="bg-white rounded-3xl border border-green-100 p-10 text-center">
           <Store size={28} className="mx-auto text-app-muted mb-3" />
           <p className="text-sm font-medium text-app-muted">Store profile not found.</p>
         </div>
-      </MerchantLayout>
+      </DashboardLayout>
     );
   }
 
   return (
-    <MerchantLayout>
+    <DashboardLayout role="merchant">
       <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} className="space-y-6">
         <div>
           <h1 className="font-display font-bold text-3xl text-app-text">Store Profile</h1>
@@ -88,6 +88,6 @@ export default function MerchantStore() {
           </div>
         </div>
       </motion.div>
-    </MerchantLayout>
+    </DashboardLayout>
   );
 }

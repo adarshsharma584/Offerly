@@ -36,7 +36,7 @@ export default function ProfilePage() {
       title: 'Support & Settings',
       items: [
         { icon: Settings, label: 'Settings', desc: 'Manage app preferences', action: () => {} },
-        { icon: HelpCircle, label: 'Help & Support', desc: 'Get assistance from our team', action: () => setShowHelp(true) },
+        { icon: HelpCircle, label: 'Help & Support', desc: 'Get assistance from our team', action: () => navigate('/profile/support') },
       ]
     },
     {

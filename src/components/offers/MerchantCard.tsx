@@ -14,6 +14,9 @@ interface MerchantCardProps {
     isAd: boolean;
     image: string;
     rating: number;
+    address?: string;
+    lat?: number;
+    lng?: number;
   };
 }
 

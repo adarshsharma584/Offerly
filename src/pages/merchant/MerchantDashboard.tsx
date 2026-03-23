@@ -1,13 +1,14 @@
 import { motion } from 'framer-motion';
-import { Gift, TrendingUp, DollarSign, Clock, CheckCircle2, ScanLine, ArrowRight, ShieldCheck, Zap } from 'lucide-react';
+import { Gift, TrendingUp, DollarSign, Clock, CheckCircle2, ScanLine, ArrowRight, ShieldCheck, Zap, Download, FileText, Share2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { 
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, 
   AreaChart, Area, Cell, RadialBarChart, RadialBar, Legend 
 } from 'recharts';
-import MerchantLayout from '@/components/layout/MerchantLayout';
+import DashboardLayout from '@/components/layout/DashboardLayout';
 import { usePlatformData } from '@/context/PlatformDataContext';
 import { useAuth } from '@/context/AuthContext';
+import { toast } from 'sonner';
 
 const weeklyData = [
   { name: 'Mon', revenue: 4000, redemptions: 12 },
@@ -28,6 +29,17 @@ export default function MerchantDashboard() {
   const { user } = useAuth();
   const { data } = usePlatformData();
   const { redemptions, offers, merchants } = data;
+
+  const handleExport = (format: 'pdf' | 'csv') => {
+    toast.promise(
+      new Promise((resolve) => setTimeout(resolve, 2000)),
+      {
+        loading: `Generating ${format.toUpperCase()} report...`,
+        success: `Report downloaded successfully!`,
+        error: 'Failed to generate report.',
+      }
+    );
+  };
 
   const currentMerchant = merchants.find(m => m.id === user?.id) || merchants.find(m => m.name === user?.businessName);
   const merchantRedemptions = redemptions.filter(r => {
@@ -55,7 +67,7 @@ export default function MerchantDashboard() {
   ];
 
   return (
-    <MerchantLayout>
+    <DashboardLayout role="merchant">
       <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="space-y-8">
         <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-6">
           <div>
@@ -66,19 +78,28 @@ export default function MerchantDashboard() {
             </p>
           </div>
           <div className="flex items-center gap-3">
+            <div className="hidden md:flex items-center gap-2 bg-white p-1.5 rounded-2xl border border-green-50 shadow-sm mr-2">
+              <button 
+                onClick={() => handleExport('csv')}
+                className="p-2.5 text-slate-500 hover:text-green-700 hover:bg-green-50 rounded-xl transition-all"
+                title="Export CSV"
+              >
+                <FileText size={20} />
+              </button>
+              <button 
+                onClick={() => handleExport('pdf')}
+                className="p-2.5 text-slate-500 hover:text-red-600 hover:bg-red-50 rounded-xl transition-all"
+                title="Export PDF"
+              >
+                <Download size={20} />
+              </button>
+            </div>
             <button
               onClick={() => navigate('/merchant/scan')}
               className="flex items-center justify-center gap-2 px-8 py-4 bg-green-700 text-white rounded-[20px] font-display font-bold shadow-xl shadow-green-900/20 hover:bg-green-800 transition-all hover:-translate-y-1"
             >
               <ScanLine size={20} />
               Scan QR
-            </button>
-            <button
-              onClick={() => navigate('/merchant/offers')}
-              className="flex items-center justify-center gap-2 px-8 py-4 bg-white text-green-800 border border-green-100 rounded-[20px] font-display font-bold hover:bg-green-50 transition-all shadow-sm"
-            >
-              Manage Offers
-              <ArrowRight size={18} />
             </button>
           </div>
         </div>
@@ -282,6 +303,6 @@ export default function MerchantDashboard() {
           </div>
         </div>
       </motion.div>
-    </MerchantLayout>
+    </DashboardLayout>
   );
 }

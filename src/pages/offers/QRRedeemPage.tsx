@@ -17,7 +17,7 @@ export default function QRRedeemPage() {
 
   const [qrPayload, setQrPayload] = useState<ReturnType<typeof generateQRData> | null>(null);
   const [timeLeft, setTimeLeft] = useState(600);
-  const [billAmount, setBillAmount] = useState('');
+  const [status, setStatus] = useState<'waiting' | 'approved' | 'expired'>('waiting');
 
   useEffect(() => {
     if (!offer || !user) return;
@@ -31,10 +31,42 @@ export default function QRRedeemPage() {
 
   useEffect(() => {
     const timer = setInterval(() => {
-      setTimeLeft(prev => (prev > 0 ? prev - 1 : 0));
+      setTimeLeft(prev => {
+        if (prev <= 1) {
+          setStatus('expired');
+          return 0;
+        }
+        return prev - 1;
+      });
     }, 1000);
-    return () => clearInterval(timer);
-  }, []);
+
+    // Check for redemption status in localStorage (simulating real-time)
+    const statusCheck = setInterval(() => {
+      if (!qrPayload) return;
+      const redemptions = JSON.parse(localStorage.getItem('offerly_redemptions') || '[]');
+      const isRedeemed = redemptions.some((r: any) => r.token === qrPayload.token);
+      if (isRedeemed) {
+        setStatus('approved');
+        clearInterval(statusCheck);
+        clearInterval(timer);
+        // After 2 seconds, navigate to success page
+        setTimeout(() => {
+          navigate(`/offers/${id}/approved`, { 
+            state: { 
+              billAmount: 0, // In real SaaS, merchant enters this
+              savings: offer.value,
+              offerId: offer.id 
+            } 
+          });
+        }, 2000);
+      }
+    }, 2000);
+
+    return () => {
+      clearInterval(timer);
+      clearInterval(statusCheck);
+    };
+  }, [qrPayload, offer, id, navigate]);
 
   const regenerateQR = () => {
     if (!offer || !user) return;
@@ -96,96 +128,68 @@ export default function QRRedeemPage() {
         {/* Merchant + offer info */}
         <h2 className="font-display font-bold text-xl text-app-text mb-1">{merchant.name}</h2>
         <p className="text-app-muted text-sm mb-2">{offer.title}</p>
-        <div className="inline-flex items-center gap-1.5 bg-green-100 text-green-700 text-xs font-display font-bold px-3 py-1 rounded-full mb-6">
-          <span className="w-2 h-2 bg-green-700 rounded-full" />
-          Offer Active
+        
+        <div className={`inline-flex items-center gap-1.5 ${status === 'approved' ? 'bg-green-100 text-green-700' : status === 'expired' ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'} text-xs font-display font-bold px-3 py-1 rounded-full mb-6`}>
+          <span className={`w-2 h-2 ${status === 'approved' ? 'bg-green-700' : status === 'expired' ? 'bg-red-700' : 'bg-green-700'} rounded-full animate-pulse`} />
+          {status === 'approved' ? 'OFFER REDEEMED!' : status === 'expired' ? 'QR EXPIRED' : 'WAITING FOR SCAN'}
         </div>
-        <p className="text-app-muted text-xs mb-6">Valid for this visit</p>
 
-        {/* QR Code */}
-        <div className="flex justify-center mb-4">
-          <div className="relative p-6 bg-white rounded-[32px] shadow-qr-glow">
-            <div className={`transition-all ${isExpired ? 'blur-md' : ''}`}>
-              {qrPayload && (
-                <QRCodeSVG
-                  value={JSON.stringify(qrPayload)}
-                  size={200}
-                  fgColor="#1B4332"
-                  level="M"
-                />
-              )}
+        {/* QR Section */}
+        <div className="bg-white p-8 rounded-[40px] border-2 border-green-50 shadow-2xl relative overflow-hidden text-center">
+          {status === 'approved' ? (
+            <motion.div initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="py-10">
+              <div className="w-24 h-24 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                <CheckCircle2 size={48} className="text-green-600" />
+              </div>
+              <h3 className="font-display font-bold text-2xl text-app-text">Successfully Redeemed!</h3>
+              <p className="text-app-muted mt-2">Redirecting to your savings summary...</p>
+            </motion.div>
+          ) : status === 'expired' ? (
+            <div className="py-10">
+              <div className="w-24 h-24 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                <XCircle size={48} className="text-red-600" />
+              </div>
+              <h3 className="font-display font-bold text-2xl text-app-text">QR Code Expired</h3>
+              <button onClick={regenerateQR} className="mt-6 px-6 py-3 bg-green-700 text-white rounded-full font-display font-bold">
+                Regenerate QR
+              </button>
             </div>
-            {isExpired && (
-              <div className="absolute inset-0 flex flex-col items-center justify-center bg-white/60 rounded-[32px]">
-                <p className="text-red-600 font-display font-bold mb-2">QR Expired</p>
-                <div
-                  onClick={regenerateQR}
-                  className="bg-green-700 text-white font-display font-bold px-4 py-2 rounded-full text-sm cursor-pointer"
-                >
-                  Generate New QR
+          ) : (
+            <>
+              <div className="bg-green-50 p-6 rounded-[32px] mb-8 inline-block">
+                <div className="bg-white p-4 rounded-2xl shadow-sm">
+                  {qrPayload && <QRCodeSVG value={JSON.stringify(qrPayload)} size={220} level="H" includeMargin={true} />}
                 </div>
               </div>
-            )}
+
+              <div className="space-y-4">
+                <div className={`flex items-center justify-center gap-2 font-display font-bold text-lg ${isCritical ? 'text-red-600' : isWarning ? 'text-amber-600' : 'text-green-700'}`}>
+                  <Clock size={20} />
+                  <span>{formatTimer(timeLeft)}</span>
+                </div>
+                <p className="text-app-muted text-sm max-w-[240px] mx-auto">
+                  Show this QR code to the store merchant to redeem your offer.
+                </p>
+              </div>
+            </>
+          )}
+        </div>
+
+        {/* Instructions */}
+        <div className="mt-10 space-y-6">
+          <h4 className="font-display font-bold text-app-text text-lg">Next Steps</h4>
+          <div className="space-y-4">
+            {[
+              { icon: '🛍️', text: 'Visit the store mentioned above' },
+              { icon: '📱', text: 'Show this QR code to the merchant' },
+              { icon: '✨', text: 'Merchant will scan and apply your discount' }
+            ].map((step, i) => (
+              <div key={i} className="flex gap-4">
+                <span className="text-2xl">{step.icon}</span>
+                <p className="text-app-mid font-medium">{step.text}</p>
+              </div>
+            ))}
           </div>
-        </div>
-
-        <p className="text-center text-app-muted text-sm mb-6">Show this QR code to the merchant before payment</p>
-
-        {/* Timer */}
-        <div className="flex flex-col items-center gap-2 mb-8">
-          <div className="flex items-center gap-2 text-app-muted text-sm">
-            <Clock size={16} />
-            <span>QR expires in:</span>
-          </div>
-          <motion.span
-            animate={isCritical ? { scale: [1, 1.1, 1] } : {}}
-            transition={isCritical ? { repeat: Infinity, duration: 0.8 } : {}}
-            className={`text-4xl font-display font-bold ${
-              isCritical ? 'text-red-600' : isWarning ? 'text-amber-600' : 'text-green-700'
-            } ${isCritical ? 'animate-pulse-scale' : ''}`}
-          >
-            {formatTimer(timeLeft)}
-          </motion.span>
-        </div>
-
-        {/* Bill Amount */}
-        <div className="bg-app-bg rounded-2xl p-5 mb-4">
-          <label className="block text-xs font-display font-bold text-app-muted mb-2 uppercase tracking-wider">
-            Enter Bill Amount (Optional)
-          </label>
-          <div className="relative">
-            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-lg font-display font-bold text-app-text">₹</span>
-            <input
-              type="number"
-              value={billAmount}
-              onChange={e => setBillAmount(e.target.value)}
-              placeholder="0.00"
-              className="w-full bg-white border border-app-border rounded-xl py-3 pl-10 pr-4 font-display text-lg text-app-text outline-none"
-            />
-          </div>
-        </div>
-
-        <div className="bg-green-50 rounded-xl p-3 mb-8 text-center">
-          <p className="text-app-muted text-xs">Discount will be applied by the merchant</p>
-          <p className="text-app-muted text-xs">Offerly does not handle payments</p>
-        </div>
-
-        {/* Actions */}
-        <div className="grid grid-cols-2 gap-4">
-          <motion.div
-            whileTap={{ scale: 0.97 }}
-            onClick={() => navigate(-1)}
-            className="flex items-center justify-center gap-2 py-4 rounded-full border border-red-100 text-red-600 font-display font-bold cursor-pointer hover:bg-red-50 transition-colors"
-          >
-            <XCircle size={20} /> Cancel
-          </motion.div>
-          <motion.div
-            whileTap={{ scale: 0.97 }}
-            onClick={handleApprove}
-            className="flex items-center justify-center gap-2 py-4 rounded-full bg-green-700 text-white font-display font-bold cursor-pointer hover:bg-green-600 transition-colors shadow-lg"
-          >
-            <CheckCircle2 size={20} /> Approve
-          </motion.div>
         </div>
       </div>
     </motion.div>

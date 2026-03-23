@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Store, TrendingUp, Users, Eye, EyeOff, ChevronDown } from 'lucide-react';
+import { Store, Eye, EyeOff, ChevronDown } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 
 const CATEGORIES = [
@@ -18,7 +18,6 @@ const CATEGORIES = [
 ];
 
 const AMBER_GRADIENT = 'linear-gradient(135deg, #92400e 0%, #b45309 50%, #d97706 100%)';
-const AMBER_HERO = 'linear-gradient(160deg, #451a03 0%, #92400e 35%, #b45309 65%, #d97706 100%)';
 
 export default function MerchantLoginPage() {
   const [tab, setTab] = useState<'login' | 'register'>('login');
@@ -57,8 +56,9 @@ export default function MerchantLoginPage() {
       return;
     }
     setError('');
-    login(loginEmail, 'merchant');
-    navigate('/merchant');
+    localStorage.setItem('offerly_phone', loginEmail);
+    localStorage.setItem('offerly_login_role', 'merchant');
+    navigate('/otp');
   };
 
   const handleRegister = () => {
@@ -70,8 +70,9 @@ export default function MerchantLoginPage() {
     if (regPass.length < 6) { setError('Password must be at least 6 characters'); return; }
     if (regPass !== regConfirm) { setError('Passwords do not match'); return; }
     setError('');
-    login(regEmail, 'merchant');
-    navigate('/merchant');
+    localStorage.setItem('offerly_phone', regPhone);
+    localStorage.setItem('offerly_login_role', 'merchant');
+    navigate('/otp');
   };
 
   return (
@@ -80,81 +81,50 @@ export default function MerchantLoginPage() {
       animate={{ opacity: 1 }}
       className="min-h-screen flex flex-col md:flex-row"
     >
-      {/* ── Amber Hero ── */}
-      <div
-        className="flex-[0_0_45%] md:flex-[0_0_48%] md:min-h-screen flex flex-col items-center justify-center relative overflow-hidden"
-        style={{ background: AMBER_HERO }}
-      >
+      {/* ── Green Hero ── */}
+      <div className="flex-[0_0_45%] md:flex-[0_0_48%] md:min-h-screen flex flex-col items-center justify-center relative overflow-hidden gradient-hero">
         <div
-          className="absolute inset-0 opacity-25"
+          className="absolute inset-0 opacity-30"
           style={{
             background:
-              'radial-gradient(circle at 30% 20%, rgba(251,191,36,0.4) 0%, transparent 50%), radial-gradient(circle at 70% 80%, rgba(180,83,9,0.3) 0%, transparent 50%)',
+              'radial-gradient(circle at 30% 20%, rgba(82,183,136,0.4) 0%, transparent 50%), radial-gradient(circle at 70% 80%, rgba(64,145,108,0.3) 0%, transparent 50%)',
           }}
         />
 
-        <motion.div
-          initial={{ scale: 0.8, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          transition={{ delay: 0.2, duration: 0.5 }}
-          className="relative z-10 flex flex-col items-center px-6 text-center"
-        >
-          <div className="w-20 h-20 md:w-24 md:h-24 rounded-3xl bg-white/15 backdrop-blur-xl flex items-center justify-center mb-5 border border-white/20">
+        <div className="relative z-10 flex flex-col items-center px-6 text-center">
+          <div className="w-20 h-20 md:w-24 md:h-24 rounded-3xl bg-white/15 backdrop-blur-xl flex items-center justify-center mb-6 border border-white/20">
             <Store size={40} className="text-white" />
           </div>
 
-          {/* Brand */}
-          <div className="flex items-center gap-2 mb-2">
-            <span className="font-display font-bold text-3xl md:text-4xl text-white tracking-tight">
-              OFFERLY
-            </span>
-          </div>
-          <div className="bg-white/15 backdrop-blur-md rounded-full px-4 py-1.5 border border-white/20 mb-4">
-            <p className="text-amber-100 text-[10px] font-display font-bold uppercase tracking-widest">
+          <h1 className="font-display font-bold text-4xl md:text-5xl text-white tracking-tight">
+            OFFERLY
+          </h1>
+          <div className="bg-white/10 backdrop-blur-md rounded-full px-4 py-1.5 border border-white/20 mt-3 mb-6">
+            <p className="text-white text-[10px] font-display font-bold uppercase tracking-widest">
               Merchant Portal
             </p>
           </div>
 
-          <h2 className="font-display font-bold text-2xl md:text-3xl text-white leading-tight max-w-[260px]">
-            Your Business, Amplified
+          <h2 className="font-display font-bold text-2xl md:text-3xl text-white leading-tight max-w-[280px]">
+            Grow Your Local Business
           </h2>
-          <p className="text-white/65 text-sm mt-3 max-w-[220px]">
-            Join hundreds of merchants growing with Offerly
+          <p className="text-white/70 text-sm mt-3 max-w-[260px]">
+            List your offers, track performance and reach thousands of local customers.
           </p>
 
-          {/* Stats — desktop only */}
-          <div className="hidden md:flex gap-5 mt-10">
+          <div className="hidden md:flex gap-6 mt-10">
             {[
-              { value: '500+', label: 'Merchants', Icon: Store },
-              { value: '₹50L+', label: 'Revenue', Icon: TrendingUp },
-              { value: '10K+', label: 'Customers', Icon: Users },
-            ].map(({ value, label, Icon }) => (
+              { value: '500+', label: 'Merchants' },
+              { value: '40%', label: 'Growth' },
+            ].map((s) => (
               <div
-                key={label}
-                className="bg-white/10 backdrop-blur-xl rounded-2xl px-4 py-3 border border-white/10 text-center"
+                key={s.label}
+                className="bg-white/10 backdrop-blur-xl rounded-2xl px-6 py-3 border border-white/10 text-center"
               >
-                <Icon size={14} className="text-amber-200/70 mx-auto mb-1" />
-                <p className="text-white font-display font-bold text-lg">{value}</p>
-                <p className="text-white/55 text-[11px]">{label}</p>
+                <p className="text-white font-display font-bold text-xl">{s.value}</p>
+                <p className="text-white/60 text-[10px] uppercase tracking-wider">{s.label}</p>
               </div>
             ))}
-          </div>
-        </motion.div>
-
-        {/* Floating decorations */}
-        <div className="float-anim absolute bottom-8 right-12">
-          <div className="w-12 h-12 rounded-2xl bg-white/10 backdrop-blur-md flex items-center justify-center border border-white/15">
-            <TrendingUp size={22} className="text-amber-200" />
-          </div>
-        </div>
-        <div className="float-anim absolute top-16 left-10" style={{ animationDelay: '1.5s' }}>
-          <div className="w-10 h-10 rounded-2xl bg-white/10 backdrop-blur-md flex items-center justify-center text-amber-200 font-display text-base font-bold border border-white/15">
-            %
-          </div>
-        </div>
-        <div className="float-anim absolute bottom-24 left-14" style={{ animationDelay: '2.5s' }}>
-          <div className="w-8 h-8 rounded-xl bg-white/10 backdrop-blur-md flex items-center justify-center border border-white/10">
-            <Store size={14} className="text-amber-200/60" />
           </div>
         </div>
       </div>

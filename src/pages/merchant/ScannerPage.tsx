@@ -1,10 +1,12 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
-import { ScanLine, ArrowLeft, CheckCircle2, AlertCircle, X, Search } from 'lucide-react';
+import { ScanLine, ArrowLeft, CheckCircle2, AlertCircle, X, Search, Smartphone } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import MerchantLayout from '@/components/layout/MerchantLayout';
+import DashboardLayout from '@/components/layout/DashboardLayout';
 import { usePlatformData } from '@/context/PlatformDataContext';
 import { useAuth } from '@/context/AuthContext';
+import { Html5QrcodeScanner } from 'html5-qrcode';
+import { toast } from 'sonner';
 
 export default function ScannerPage() {
   const navigate = useNavigate();
@@ -13,33 +15,102 @@ export default function ScannerPage() {
   const [scanning, setScanning] = useState(true);
   const [result, setResult] = useState<any>(null);
   const [manualCode, setManualCode] = useState('');
+  const [billAmount, setBillAmount] = useState('');
+  const scannerRef = useRef<Html5QrcodeScanner | null>(null);
 
-  const handleManualRedeem = () => {
-    const merchant = data.merchants.find(m => m.id === user?.id) || data.merchants.find(m => m.name === user?.businessName);
-    const merchantOffers = data.offers.filter(o => o.merchantId === merchant?.id && o.status === 'active');
-    const offer = merchantOffers[0];
-    if (!offer) {
-      setResult({ success: false });
-      setScanning(false);
-      return;
+  useEffect(() => {
+    if (scanning && !result) {
+      scannerRef.current = new Html5QrcodeScanner(
+        "reader",
+        { fps: 10, qrbox: { width: 250, height: 250 } },
+        /* verbose= */ false
+      );
+      
+      scannerRef.current.render(onScanSuccess, onScanFailure);
     }
+
+    return () => {
+      if (scannerRef.current) {
+        scannerRef.current.clear().catch(error => {
+          console.error("Failed to clear scanner", error);
+        });
+      }
+    };
+  }, [scanning, result]);
+
+  function onScanSuccess(decodedText: string) {
+    try {
+      const payload = JSON.parse(decodedText);
+      if (payload.offerId && payload.token) {
+        // Stop scanning
+        if (scannerRef.current) {
+          scannerRef.current.clear();
+        }
+        
+        // Find the offer
+        const offer = data.offers.find(o => o.id === payload.offerId);
+        if (!offer) {
+          toast.error("Invalid offer code");
+          return;
+        }
+
+        setResult({ 
+          success: true, 
+          offer, 
+          payload,
+          customer: "Customer #" + payload.userId.slice(-4)
+        });
+        setScanning(false);
+      }
+    } catch (e) {
+      console.error("Invalid QR code", e);
+    }
+  }
+
+  function onScanFailure(error: any) {
+    // console.warn(`Code scan error = ${error}`);
+  }
+
+  const handleConfirmRedemption = () => {
+    if (!result || !result.offer) return;
+    
+    const bill = Number(billAmount) || 0;
+    const savings = result.offer.type === 'percent' 
+      ? Math.round(bill * result.offer.value / 100) 
+      : result.offer.value;
+
     const newRedemption = {
-      offerId: offer.id,
-      customerName: 'Demo Customer',
-      billAmount: 500,
-      discount: 100,
-      savings: 100,
+      offerId: result.offer.id,
+      token: result.payload.token,
+      customerName: result.customer,
+      billAmount: bill,
+      discount: savings,
+      savings,
       redeemedAt: new Date().toISOString(),
     };
     
+    // 1. Update Platform Data
     addRedemption(newRedemption);
-    setResult({ success: true, customer: 'Demo Customer', offer: offer.title });
-    setScanning(false);
+    
+    // 2. Update Global Redemptions (for user app to see)
+    const redemptions = JSON.parse(localStorage.getItem('offerly_redemptions') || '[]');
+    redemptions.push(newRedemption);
+    localStorage.setItem('offerly_redemptions', JSON.stringify(redemptions));
+
+    toast.success("Offer redeemed successfully!");
+    setResult({ ...result, confirmed: true, savings });
+  };
+
+  const resetScanner = () => {
+    setResult(null);
+    setScanning(true);
+    setManualCode('');
+    setBillAmount('');
   };
 
   return (
-    <MerchantLayout>
-      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="max-w-2xl mx-auto">
+    <DashboardLayout role="merchant">
+      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="max-w-2xl mx-auto px-4">
         <div className="flex items-center gap-4 mb-8">
           <button onClick={() => navigate(-1)} className="p-2 hover:bg-white rounded-xl transition-colors">
             <ArrowLeft size={20} />
@@ -47,29 +118,12 @@ export default function ScannerPage() {
           <h1 className="font-display font-bold text-2xl">Redeem Offer</h1>
         </div>
 
-        <div className="bg-white p-8 rounded-[40px] border border-app-border shadow-2xl relative overflow-hidden text-center">
-          {scanning ? (
+        <div className="bg-white p-6 md:p-10 rounded-[40px] border border-app-border shadow-2xl relative overflow-hidden">
+          {scanning && !result ? (
             <div className="space-y-8">
-              <div className="relative w-64 h-64 mx-auto">
-                <div className="absolute inset-0 border-2 border-green-500 rounded-3xl animate-pulse" />
-                <div className="absolute inset-4 border-2 border-green-500/20 rounded-2xl" />
-                <div className="absolute top-0 left-0 w-8 h-8 border-t-4 border-l-4 border-green-500 rounded-tl-2xl" />
-                <div className="absolute top-0 right-0 w-8 h-8 border-t-4 border-r-4 border-green-500 rounded-tr-2xl" />
-                <div className="absolute bottom-0 left-0 w-8 h-8 border-b-4 border-l-4 border-green-500 rounded-bl-2xl" />
-                <div className="absolute bottom-0 right-0 w-8 h-8 border-b-4 border-r-4 border-green-500 rounded-br-2xl" />
-                
-                <motion.div 
-                  animate={{ top: ['10%', '90%', '10%'] }}
-                  transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
-                  className="absolute left-4 right-4 h-0.5 bg-green-500 shadow-[0_0_15px_rgba(34,197,94,0.5)] z-10" 
-                />
-                
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <ScanLine size={64} className="text-green-500/20" />
-                </div>
-              </div>
+              <div id="reader" className="overflow-hidden rounded-3xl border-2 border-green-100"></div>
 
-              <div>
+              <div className="text-center">
                 <h3 className="font-display font-bold text-xl text-app-text">Scanning for QR...</h3>
                 <p className="text-app-muted text-sm mt-2">Position the customer's QR code within the frame</p>
               </div>
@@ -78,7 +132,7 @@ export default function ScannerPage() {
                 <div className="absolute inset-0 flex items-center">
                   <div className="w-full border-t border-app-border"></div>
                 </div>
-                <div className="relative flex justify-center text-xs uppercase tracking-widest font-bold">
+                <div className="relative flex justify-center text-[10px] uppercase tracking-widest font-bold">
                   <span className="bg-white px-4 text-app-muted">OR ENTER CODE</span>
                 </div>
               </div>
@@ -95,57 +149,96 @@ export default function ScannerPage() {
                   />
                 </div>
                 <button 
-                  onClick={handleManualRedeem}
-                  disabled={manualCode.length < 6}
+                  onClick={() => onScanSuccess(JSON.stringify({ offerId: 'o1', token: 'demo-token-' + manualCode, userId: 'u123' }))}
+                  disabled={manualCode.length < 4}
                   className="px-6 bg-green-700 text-white rounded-2xl font-display font-bold disabled:opacity-50 transition-all"
                 >
                   Verify
                 </button>
               </div>
             </div>
-          ) : result?.success ? (
-            <motion.div initial={{ scale: 0.9 }} animate={{ scale: 1 }} className="py-8 space-y-6">
-              <div className="w-24 h-24 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-4">
-                <CheckCircle2 size={48} />
+          ) : result && !result.confirmed ? (
+            <div className="space-y-8">
+              <div className="text-center">
+                <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                  <Smartphone size={32} className="text-green-600" />
+                </div>
+                <h3 className="font-display font-bold text-2xl text-app-text">Offer Found!</h3>
+                <p className="text-app-muted mt-2">{result.offer.title}</p>
+                <p className="text-green-700 font-bold text-sm bg-green-50 px-3 py-1 rounded-full inline-block mt-2">
+                  {result.customer}
+                </p>
               </div>
-              <div>
-                <h3 className="font-display font-bold text-2xl text-app-text">Offer Redeemed!</h3>
-                <p className="text-app-muted font-medium mt-2">Successfully processed for {result.customer}</p>
-              </div>
-              <div className="bg-green-50 p-6 rounded-3xl border border-green-100 text-left">
-                <p className="text-[10px] font-bold text-green-700 uppercase tracking-widest mb-2">Offer Details</p>
-                <p className="font-display font-bold text-app-text">{result.offer}</p>
-                <div className="flex justify-between mt-4 pt-4 border-t border-green-200/50">
-                  <span className="text-xs font-bold text-app-muted">TIME</span>
-                  <span className="text-xs font-bold text-app-text">{new Date().toLocaleTimeString()}</span>
+
+              <div className="bg-app-bg p-6 rounded-3xl space-y-4">
+                <div>
+                  <label className="block text-xs font-display font-bold text-app-muted mb-2 uppercase tracking-wider">
+                    Total Bill Amount
+                  </label>
+                  <div className="relative">
+                    <span className="absolute left-4 top-1/2 -translate-y-1/2 font-display font-bold text-app-text">₹</span>
+                    <input 
+                      type="number" 
+                      placeholder="0.00"
+                      value={billAmount}
+                      onChange={(e) => setBillAmount(e.target.value)}
+                      className="w-full bg-white border border-app-border rounded-2xl py-4 pl-10 pr-4 font-display font-bold text-xl text-app-text focus:outline-none focus:ring-2 focus:ring-green-500/20 transition-all"
+                    />
+                  </div>
+                </div>
+
+                <div className="flex justify-between items-center py-2 border-t border-app-border">
+                  <span className="text-app-muted font-medium">Estimated Discount</span>
+                  <span className="font-display font-bold text-green-700 text-lg">
+                    - ₹{result.offer.type === 'percent' ? Math.round((Number(billAmount) || 0) * result.offer.value / 100) : result.offer.value}
+                  </span>
                 </div>
               </div>
+
+              <div className="flex gap-4">
+                <button 
+                  onClick={resetScanner}
+                  className="flex-1 py-4 border border-app-border rounded-2xl font-display font-bold text-app-muted hover:bg-app-bg transition-all"
+                >
+                  Cancel
+                </button>
+                <button 
+                  onClick={handleConfirmRedemption}
+                  className="flex-[2] py-4 bg-green-700 text-white rounded-2xl font-display font-bold shadow-glow hover:bg-green-800 transition-all"
+                >
+                  Confirm Redemption
+                </button>
+              </div>
+            </div>
+          ) : (
+            <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="text-center py-10">
+              <div className="w-24 h-24 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-8">
+                <CheckCircle2 size={48} className="text-green-600" />
+              </div>
+              <h3 className="font-display font-bold text-3xl text-app-text mb-2">Success!</h3>
+              <p className="text-app-muted mb-8">Offer has been successfully redeemed and recorded.</p>
+              
+              <div className="bg-green-50 p-6 rounded-3xl mb-8 max-w-sm mx-auto">
+                <div className="flex justify-between mb-2">
+                  <span className="text-app-muted text-sm">Bill Amount</span>
+                  <span className="font-bold text-app-text">₹{billAmount}</span>
+                </div>
+                <div className="flex justify-between font-display font-bold text-green-700 text-lg">
+                  <span>Savings</span>
+                  <span>- ₹{result.savings}</span>
+                </div>
+              </div>
+
               <button 
-                onClick={() => { setScanning(true); setResult(null); setManualCode(''); }}
-                className="w-full py-4 bg-[#0B2519] text-white rounded-2xl font-display font-bold shadow-xl transition-all"
+                onClick={resetScanner}
+                className="px-10 py-4 bg-green-700 text-white rounded-2xl font-display font-bold shadow-glow hover:bg-green-800 transition-all"
               >
-                Scan Another
+                Scan Next
               </button>
             </motion.div>
-          ) : (
-            <div className="py-8 space-y-6">
-              <div className="w-24 h-24 bg-red-100 text-red-600 rounded-full flex items-center justify-center mx-auto mb-4">
-                <AlertCircle size={48} />
-              </div>
-              <div>
-                <h3 className="font-display font-bold text-2xl text-app-text">Invalid Code</h3>
-                <p className="text-app-muted font-medium mt-2">The code you entered is incorrect or expired.</p>
-              </div>
-              <button 
-                onClick={() => setScanning(true)}
-                className="w-full py-4 bg-[#0B2519] text-white rounded-2xl font-display font-bold shadow-xl transition-all"
-              >
-                Try Again
-              </button>
-            </div>
           )}
         </div>
       </motion.div>
-    </MerchantLayout>
+    </DashboardLayout>
   );
 }

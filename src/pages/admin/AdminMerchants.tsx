@@ -1,13 +1,13 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Store, Search, Filter, CheckCircle2, XCircle, Clock, MapPin, Phone, Star, ShieldCheck, ChevronRight, MoreHorizontal, AlertCircle, Eye, Trash2 } from 'lucide-react';
-import AdminLayout from '@/components/layout/AdminLayout';
+import DashboardLayout from '@/components/layout/DashboardLayout';
 import { usePlatformData } from '@/context/PlatformDataContext';
 
 export default function AdminMerchants() {
   const { data, updateMerchant } = usePlatformData();
   const { merchants } = data;
-  const [filter, setFilter] = useState<'all' | 'pending' | 'approved' | 'rejected'>('all');
+  const [filter, setFilter] = useState<'all' | 'pending' | 'verified' | 'rejected'>('all');
   const [search, setSearch] = useState('');
   const [selectedMerchant, setSelectedMerchant] = useState<any>(null);
 
@@ -19,12 +19,12 @@ export default function AdminMerchants() {
   });
 
   const handleStatusChange = (id: string, status: string) => {
-    updateMerchant(id, { status, isVerified: status === 'approved' });
+    updateMerchant(id, { status, isVerified: status === 'verified' });
     if (selectedMerchant?.id === id) setSelectedMerchant(null);
   };
 
   return (
-    <AdminLayout>
+    <DashboardLayout role="admin">
       <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} className="space-y-8 pb-20">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div>
@@ -32,7 +32,7 @@ export default function AdminMerchants() {
             <p className="text-app-muted text-sm mt-1 font-medium">Manage and approve local business partners</p>
           </div>
           <div className="flex items-center gap-2 bg-gray-100/50 p-1 rounded-2xl border border-gray-100">
-            {['all', 'pending', 'approved', 'rejected'].map(f => (
+            {['all', 'pending', 'verified', 'rejected'].map(f => (
               <button
                 key={f}
                 onClick={() => setFilter(f as any)}
@@ -50,7 +50,7 @@ export default function AdminMerchants() {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {[
             { label: 'Total', count: merchants.length, color: 'bg-blue-500', bg: 'bg-blue-50', text: 'text-blue-700' },
-            { label: 'Approved', count: merchants.filter(m => m.status === 'approved').length, color: 'bg-green-500', bg: 'bg-green-50', text: 'text-green-700' },
+            { label: 'Verified', count: merchants.filter(m => m.status === 'verified').length, color: 'bg-green-500', bg: 'bg-green-50', text: 'text-green-700' },
             { label: 'Pending', count: merchants.filter(m => m.status === 'pending').length, color: 'bg-amber-500', bg: 'bg-amber-50', text: 'text-amber-700' },
             { label: 'Rejected', count: merchants.filter(m => m.status === 'rejected').length, color: 'bg-red-500', bg: 'bg-red-50', text: 'text-red-700' },
           ].map((stat) => (
@@ -326,6 +326,6 @@ export default function AdminMerchants() {
           )}
         </AnimatePresence>
       </motion.div>
-    </AdminLayout>
+    </DashboardLayout>
   );
 }

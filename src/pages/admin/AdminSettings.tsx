@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion';
 import { Settings, Shield, Bell, DollarSign, Database, LayoutGrid, ArrowRight, Save, Globe, Lock } from 'lucide-react';
-import AdminLayout from '@/components/layout/AdminLayout';
+import DashboardLayout from '@/components/layout/DashboardLayout';
 import { toast } from 'sonner';
 
 export default function AdminSettings() {
@@ -25,7 +25,7 @@ export default function AdminSettings() {
       title: 'Security & Access',
       icon: Shield,
       items: [
-        { label: 'Admin Roles', desc: 'Manage sub-admin permissions', icon: Shield },
+        { label: 'Admin Roles', desc: 'Manage sub-admin permissions', icon: Shield, path: '/admin/staff' },
         { label: 'API Keys', desc: 'Manage external integration keys', icon: Lock },
       ]
     },
@@ -39,7 +39,7 @@ export default function AdminSettings() {
   ];
 
   return (
-    <AdminLayout>
+    <DashboardLayout role="admin">
       <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} className="space-y-8 pb-20 max-w-4xl mx-auto">
         <div className="flex items-center justify-between">
           <div>
@@ -72,7 +72,13 @@ export default function AdminSettings() {
                 {group.items.map(item => (
                   <div 
                     key={item.label} 
-                    onClick={() => toast.info(`${item.label} configuration module coming soon`)} 
+                    onClick={() => {
+                      if (item.path) {
+                        window.location.href = item.path;
+                      } else {
+                        toast.info(`${item.label} configuration module coming soon`);
+                      }
+                    }} 
                     className="bg-white p-6 rounded-[28px] border border-app-border shadow-sm hover:shadow-xl hover:border-green-700/20 transition-all cursor-pointer group"
                   >
                     <div className="flex items-start justify-between">
@@ -98,15 +104,20 @@ export default function AdminSettings() {
         <div className="pt-8 mt-8 border-t border-red-100">
           <div className="bg-red-50 p-8 rounded-[32px] border border-red-100 flex flex-col md:flex-row items-center justify-between gap-6">
             <div className="text-center md:text-left">
-              <h3 className="text-lg font-display font-bold text-red-900">Danger Zone</h3>
-              <p className="text-sm text-red-700 mt-1">Maintenance mode and database reset</p>
+              <h3 className="font-display font-bold text-xl text-red-700">Platform Maintenance</h3>
+              <p className="text-red-600/70 text-sm mt-1">Actions here are permanent and affect all users.</p>
             </div>
-            <button className="px-8 py-3 bg-red-600 text-white rounded-2xl font-display font-bold shadow-xl shadow-red-900/20 hover:bg-red-700 transition-all">
-              Maintenance Mode
-            </button>
+            <div className="flex gap-3">
+              <button className="px-6 py-3 bg-white text-red-600 border border-red-100 rounded-xl font-display font-bold text-sm hover:bg-red-50 transition-colors">
+                Clear Cache
+              </button>
+              <button className="px-6 py-3 bg-red-600 text-white rounded-xl font-display font-bold text-sm hover:bg-red-700 transition-all shadow-lg shadow-red-900/20">
+                System Reset
+              </button>
+            </div>
           </div>
         </div>
       </motion.div>
-    </AdminLayout>
+    </DashboardLayout>
   );
 }
