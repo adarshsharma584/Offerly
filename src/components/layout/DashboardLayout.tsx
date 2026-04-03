@@ -26,12 +26,14 @@ const merchantNav: SidebarItem[] = [
 
 const adminNav: SidebarItem[] = [
   { path: '/admin', label: 'Overview', icon: LayoutDashboard },
-  { path: '/admin/merchants', label: 'Merchants', icon: UserCheck },
-  { path: '/admin/offers', label: 'Offer Approvals', icon: BadgePercent },
-  { path: '/admin/ads', label: 'Ad Approvals', icon: Sparkles },
-  { path: '/admin/users', label: 'Customers', icon: Users },
-  { path: '/admin/staff', label: 'Staff Management', icon: ShieldCheck },
-  { path: '/admin/settings', label: 'System', icon: Settings },
+  { path: '/admin/merchants', label: 'Merchants', icon: Store },
+  { path: '/admin/users', label: 'Users', icon: Users },
+  { path: '/admin/offers', label: 'Available Offers', icon: Gift },
+  { path: '/admin/ads', label: 'Ad Approval', icon: Sparkles },
+  { path: '/admin/subscriptions', label: 'Subscriptions', icon: BadgePercent },
+  { path: '/admin/analytics', label: 'Analytics', icon: BarChart3 },
+  { path: '/admin/staff', label: 'Sub-Admins', icon: ShieldCheck },
+  { path: '/admin/settings', label: 'Settings', icon: Settings },
 ];
 
 const subAdminNav: SidebarItem[] = [

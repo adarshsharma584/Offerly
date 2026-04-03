@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { ArrowLeft, Gift, Loader2, Shield } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
+import api from '@/lib/api';
 
 export default function OTPPage() {
   const [otp, setOtp] = useState<string[]>(Array(6).fill(''));
@@ -13,6 +14,7 @@ export default function OTPPage() {
   const navigate = useNavigate();
   const { login } = useAuth();
   const phone = localStorage.getItem('offerly_phone') || '+91 98767 54321';
+  const phoneForApi = phone.replace(/\s/g, '').replace('+91', '');
 
   useEffect(() => {
     inputRefs.current[0]?.focus();
@@ -43,21 +45,41 @@ export default function OTPPage() {
     }
   };
 
-  const verify = (code?: string) => {
+  const verify = async (code?: string) => {
     const finalCode = code || otp.join('');
     if (finalCode.length !== 6) { setError('Enter all 6 digits'); return; }
     setLoading(true);
+    setError('');
+    
     const role = (localStorage.getItem('offerly_login_role') as any) || 'user';
     const subCat = (localStorage.getItem('offerly_sub_cat') as any) || null;
-    setTimeout(() => { 
+
+    try {
+      // Try to verify with backend
+      const response = await api.verifyOTP(phoneForApi, finalCode, role);
+      
+      if (response.success && response.data) {
+        // Backend verified - user is already set in context
+        localStorage.removeItem('offerly_sub_cat');
+        
+        if (role === 'admin') navigate('/admin');
+        else if (role === 'merchant') navigate('/merchant');
+        else if (role === 'sub_admin') navigate('/sub-admin');
+        else navigate('/');
+      }
+    } catch (apiError: any) {
+      // If API fails, use mock login (for development without backend)
+      console.log('API verification failed, using mock login');
       login(phone, role, subCat); 
+      localStorage.removeItem('offerly_sub_cat');
+      
       if (role === 'admin') navigate('/admin');
       else if (role === 'merchant') navigate('/merchant');
       else if (role === 'sub_admin') navigate('/sub-admin');
-      else navigate('/'); 
-      // Cleanup
-      localStorage.removeItem('offerly_sub_cat');
-    }, 500);
+      else navigate('/');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (

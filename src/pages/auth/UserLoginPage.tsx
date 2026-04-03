@@ -1,21 +1,33 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Gift, Sparkles } from 'lucide-react';
+import { Gift, Sparkles, Loader2 } from 'lucide-react';
+import api from '@/lib/api';
 
 export default function UserLoginPage() {
   const [phone, setPhone] = useState('');
   const [remember, setRemember] = useState(false);
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  const handleContinue = () => {
+  const handleContinue = async () => {
     const digits = phone.replace(/\D/g, '');
     if (digits.length !== 10) {
       setError('Enter a valid 10-digit number');
       return;
     }
     setError('');
+    setLoading(true);
+    
+    try {
+      // Try to send OTP via backend
+      await api.sendOTP(digits);
+    } catch (apiError) {
+      console.log('API not available, using mock mode');
+    }
+    
+    setLoading(false);
     localStorage.setItem('offerly_phone', `+91 ${phone}`);
     localStorage.setItem('offerly_login_role', 'user');
     navigate('/otp');
@@ -148,9 +160,16 @@ export default function UserLoginPage() {
               whileTap={{ scale: 0.97 }}
               whileHover={{ scale: 1.01 }}
               onClick={handleContinue}
-              className="w-full gradient-accent text-white font-display font-bold text-center py-3.5 rounded-full cursor-pointer transition-all shadow-glow hover:shadow-glow-lg"
+              className="w-full gradient-accent text-white font-display font-bold text-center py-3.5 rounded-full cursor-pointer transition-all shadow-glow hover:shadow-glow-lg flex items-center justify-center gap-2"
             >
-              Continue
+              {loading ? (
+                <>
+                  <Loader2 size={18} className="animate-spin" />
+                  Sending OTP...
+                </>
+              ) : (
+                'Continue'
+              )}
             </motion.div>
 
             <div className="flex items-center gap-3 my-6">

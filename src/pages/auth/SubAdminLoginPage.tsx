@@ -1,8 +1,9 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ShieldCheck, Eye, EyeOff, ChevronDown, LayoutDashboard } from 'lucide-react';
+import { ShieldCheck, Eye, EyeOff, ChevronDown, LayoutDashboard, Loader2 } from 'lucide-react';
 import { useAuth, SubAdminCategory } from '@/context/AuthContext';
+import api from '@/lib/api';
 
 const SUB_ADMIN_CATEGORIES: { id: SubAdminCategory; label: string }[] = [
   { id: 'support', label: 'Customer Support' },
@@ -13,6 +14,7 @@ const SUB_ADMIN_CATEGORIES: { id: SubAdminCategory; label: string }[] = [
 
 export default function SubAdminLoginPage() {
   const [tab, setTab] = useState<'login' | 'register'>('login');
+  const [loading, setLoading] = useState(false);
 
   // Login state
   const [loginEmail, setLoginEmail] = useState('');
@@ -31,25 +33,44 @@ export default function SubAdminLoginPage() {
   const navigate = useNavigate();
   const { login } = useAuth();
 
-  const handleLogin = () => {
+  const handleLogin = async () => {
     if (!loginEmail.includes('@')) { setError('Enter a valid email address'); return; }
     if (!loginPass) { setError('Enter your password'); return; }
     setError('');
+    setLoading(true);
+    
+    const phoneDigits = loginEmail.replace(/\D/g, '');
+    try {
+      await api.sendOTP(phoneDigits);
+    } catch (e) {
+      console.log('API not available, using mock mode');
+    }
+    
+    setLoading(false);
     localStorage.setItem('offerly_phone', loginEmail);
     localStorage.setItem('offerly_login_role', 'sub_admin');
     navigate('/otp');
   };
 
-  const handleRegister = () => {
+  const handleRegister = async () => {
     if (!fullName.trim()) { setError('Enter your full name'); return; }
     if (!category) { setError('Select an administrative category'); return; }
     if (!regEmail.includes('@')) { setError('Enter a valid email address'); return; }
     if (regPass.length < 6) { setError('Password must be at least 6 characters'); return; }
     if (regPass !== regConfirm) { setError('Passwords do not match'); return; }
     setError('');
+    setLoading(true);
+    
+    const phoneDigits = regEmail.replace(/\D/g, '');
+    try {
+      await api.sendOTP(phoneDigits);
+    } catch (e) {
+      console.log('API not available, using mock mode');
+    }
+    
+    setLoading(false);
     localStorage.setItem('offerly_phone', regEmail);
     localStorage.setItem('offerly_login_role', 'sub_admin');
-    // Store category temporarily for the mock login
     localStorage.setItem('offerly_sub_cat', category);
     navigate('/otp');
   };
@@ -97,7 +118,9 @@ export default function SubAdminLoginPage() {
                     <button onClick={() => setShowLoginPass(!showLoginPass)} className="absolute right-5 bottom-4 text-gray-400 hover:text-gray-600 transition-colors">{showLoginPass ? <EyeOff size={18} /> : <Eye size={18} />}</button>
                   </div>
                   {error && <p className="text-red-500 text-xs font-medium ml-1">{error}</p>}
-                  <button onClick={handleLogin} className="w-full bg-green-700 hover:bg-green-800 text-white font-display font-bold py-4 rounded-2xl shadow-xl shadow-green-700/20 transition-all mt-4">Sign In</button>
+                  <button onClick={handleLogin} disabled={loading} className="w-full bg-green-700 hover:bg-green-800 text-white font-display font-bold py-4 rounded-2xl shadow-xl shadow-green-700/20 transition-all mt-4 flex items-center justify-center gap-2">
+                    {loading ? <><Loader2 size={18} className="animate-spin" /> Signing in...</> : 'Sign In'}
+                  </button>
                 </div>
               </motion.div>
             ) : (

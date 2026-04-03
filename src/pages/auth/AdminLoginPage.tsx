@@ -1,8 +1,9 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { ShieldCheck, Lock, Eye, EyeOff, AlertTriangle, Mail } from 'lucide-react';
+import { ShieldCheck, Lock, Eye, EyeOff, AlertTriangle, Mail, Loader2 } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
+import api from '@/lib/api';
 
 export default function AdminLoginPage() {
   const NAVY_BUTTON = 'linear-gradient(135deg, #1e1b4b 0%, #312e81 50%, #4338ca 100%)';
@@ -10,11 +11,12 @@ export default function AdminLoginPage() {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
 
   const navigate = useNavigate();
   const { login } = useAuth();
 
-  const handleLogin = () => {
+  const handleLogin = async () => {
     if (!email.includes('@')) {
       setError('Enter a valid admin email');
       return;
@@ -24,6 +26,16 @@ export default function AdminLoginPage() {
       return;
     }
     setError('');
+    setLoading(true);
+    
+    const phoneDigits = email.replace(/\D/g, '');
+    try {
+      await api.sendOTP(phoneDigits);
+    } catch (e) {
+      console.log('API not available, using mock mode');
+    }
+    
+    setLoading(false);
     localStorage.setItem('offerly_phone', email);
     localStorage.setItem('offerly_login_role', 'admin');
     navigate('/otp');
@@ -154,13 +166,21 @@ export default function AdminLoginPage() {
               whileTap={{ scale: 0.97 }}
               whileHover={{ scale: 1.01 }}
               onClick={handleLogin}
-              className="w-full text-white font-display font-bold text-center py-3.5 rounded-full cursor-pointer transition-all mt-6"
+              disabled={loading}
+              className="w-full text-white font-display font-bold text-center py-3.5 rounded-full cursor-pointer transition-all mt-6 flex items-center justify-center gap-2"
               style={{
                 background: NAVY_BUTTON,
                 boxShadow: '0 4px 22px rgba(49,46,129,0.32)',
               }}
             >
-              Sign In to Admin Console
+              {loading ? (
+                <>
+                  <Loader2 size={18} className="animate-spin" />
+                  Signing in...
+                </>
+              ) : (
+                'Sign In to Admin Console'
+              )}
             </motion.button>
 
             <div className="mt-7 pt-5 border-t border-app-border space-y-2">

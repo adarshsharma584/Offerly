@@ -71,8 +71,11 @@ const AdminDashboard = lazy(() => import("./pages/admin/AdminDashboard"));
 const SubAdminDesk = lazy(() => import("./pages/sub-admin/SubAdminDesk"));
 const AdminMerchants = lazy(() => import("./pages/admin/AdminMerchants"));
 const AdminOffers = lazy(() => import("./pages/admin/AdminOffers"));
+const AdminAds = lazy(() => import("./pages/admin/AdminAds"));
 const AdminSubAdmins = lazy(() => import("./pages/admin/AdminSubAdmins"));
 const AdminUsers = lazy(() => import("./pages/admin/AdminUsers"));
+const AdminSubscriptions = lazy(() => import("./pages/admin/AdminSubscriptions"));
+const AdminAnalytics = lazy(() => import("./pages/admin/AdminAnalytics"));
 const AdminSettings = lazy(() => import("./pages/admin/AdminSettings"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
@@ -165,8 +168,10 @@ const App = () => (
                   <Route path="/admin" element={<AuthGuard loginPath="/admin/login"><AdminDashboard /></AuthGuard>} />
                   <Route path="/admin/merchants" element={<AuthGuard loginPath="/admin/login"><AdminMerchants /></AuthGuard>} />
                   <Route path="/admin/offers" element={<AuthGuard loginPath="/admin/login"><AdminOffers /></AuthGuard>} />
-                  <Route path="/admin/ads" element={<AuthGuard loginPath="/admin/login"><AdminOffers /></AuthGuard>} />
+                  <Route path="/admin/ads" element={<AuthGuard loginPath="/admin/login"><AdminAds /></AuthGuard>} />
                   <Route path="/admin/users" element={<AuthGuard loginPath="/admin/login"><AdminUsers /></AuthGuard>} />
+                  <Route path="/admin/subscriptions" element={<AuthGuard loginPath="/admin/login"><AdminSubscriptions /></AuthGuard>} />
+                  <Route path="/admin/analytics" element={<AuthGuard loginPath="/admin/login"><AdminAnalytics /></AuthGuard>} />
                   <Route path="/admin/staff" element={<AuthGuard loginPath="/admin/login"><AdminSubAdmins /></AuthGuard>} />
                   <Route path="/admin/settings" element={<AuthGuard loginPath="/admin/login"><AdminSettings /></AuthGuard>} />
 

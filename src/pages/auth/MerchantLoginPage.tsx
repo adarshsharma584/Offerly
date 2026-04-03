@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Store, Eye, EyeOff, ChevronDown, Users } from 'lucide-react';
+import { Store, Eye, EyeOff, ChevronDown, Users, Loader2 } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
+import api from '@/lib/api';
 
 const CATEGORIES = [
   'Food & Beverage',
@@ -21,6 +22,7 @@ const AMBER_GRADIENT = 'linear-gradient(135deg, #92400e 0%, #b45309 50%, #d97706
 
 export default function MerchantLoginPage() {
   const [tab, setTab] = useState<'login' | 'register'>('login');
+  const [loading, setLoading] = useState(false);
 
   // Login state
   const [loginEmail, setLoginEmail] = useState('');
@@ -46,7 +48,7 @@ export default function MerchantLoginPage() {
     setError('');
   };
 
-  const handleLogin = () => {
+  const handleLogin = async () => {
     if (!loginEmail.includes('@')) {
       setError('Enter a valid email address');
       return;
@@ -56,12 +58,22 @@ export default function MerchantLoginPage() {
       return;
     }
     setError('');
+    setLoading(true);
+    
+    const phoneDigits = loginEmail.replace(/\D/g, '');
+    try {
+      await api.sendOTP(phoneDigits);
+    } catch (e) {
+      console.log('API not available, using mock mode');
+    }
+    
+    setLoading(false);
     localStorage.setItem('offerly_phone', loginEmail);
     localStorage.setItem('offerly_login_role', 'merchant');
     navigate('/otp');
   };
 
-  const handleRegister = () => {
+  const handleRegister = async () => {
     if (!bizName.trim()) { setError('Enter your business name'); return; }
     if (!category) { setError('Select a business category'); return; }
     if (!ownerName.trim()) { setError('Enter owner / manager name'); return; }
@@ -70,6 +82,16 @@ export default function MerchantLoginPage() {
     if (regPass.length < 6) { setError('Password must be at least 6 characters'); return; }
     if (regPass !== regConfirm) { setError('Passwords do not match'); return; }
     setError('');
+    setLoading(true);
+    
+    const phoneDigits = regPhone.replace(/\D/g, '');
+    try {
+      await api.sendOTP(phoneDigits);
+    } catch (e) {
+      console.log('API not available, using mock mode');
+    }
+    
+    setLoading(false);
     localStorage.setItem('offerly_phone', regPhone);
     localStorage.setItem('offerly_login_role', 'merchant');
     navigate('/otp');
